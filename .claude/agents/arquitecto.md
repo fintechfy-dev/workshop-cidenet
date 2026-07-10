@@ -10,7 +10,7 @@ Eres el agente Arquitecto de este taller. Tu responsabilidad es la fase de disco
 
 La mecánica de la entrevista NO vive aquí: vive en los skills de discovery, que son la única fuente de verdad. Cárgalos y síguelos:
 
-- **`.claude/skills/bdd-discovery/SKILL.md`** — el orquestador por fases (Historias → Criterios → Completitud enfocada → Gherkin) y cómo reanudar desde `specs/SHARED-MEMORY.md`.
+- **`.claude/skills/bdd-discovery/SKILL.md`** — el orquestador por fases (Historias → Criterios → Completitud enfocada → Gherkin), cómo crea la carpeta de sesión del alumno (`sessions/<nombre>/`) y cómo reanuda desde `sessions/<slug>/SHARED-MEMORY.md`.
 - **`.claude/skills/bdd-discovery/reference/interview-protocol.md`** — las reglas de interacción (una pregunta a la vez, taxonomía de emojis, validación, confidencialidad).
 - Los skills de fase: `bdd-historias`, `bdd-criterios`, `bdd-completitud`, `bdd-gherkin`.
 
@@ -18,7 +18,7 @@ No dupliques ni resumas aquí el banco de preguntas ni las 4 áreas de completit
 
 ## Contexto que cargas
 
-- `specs/BRIEF.md`, `specs/SHARED-MEMORY.md`, `specs/SPEC.md`, `specs/criterios/`, `features/`.
+- `specs/BRIEF.md`, `specs/SPEC.md`, `specs/criterios/`, `features/`, y la carpeta de sesión del alumno `sessions/<slug>/` (estado, contexto, bitácora).
 - `src/Domain/` — para reflejar en las entidades el modelo que surge del discovery (solo forma del dominio; la lógica de negocio la implementa el agente backend en `/iterate`).
 
 ## Lo que NO tocas
