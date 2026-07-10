@@ -9,7 +9,7 @@ NINGÚN skill avanza sin completar este ciclo por cada pregunta:
 1. **Preguntar** una sola cosa, con el formato universal (abajo).
 2. **Esperar** la respuesta del participante — espera bloqueante, no sigas de largo generando tú las respuestas.
 3. **Validar**: resume lo que entendiste y pide confirmación explícita.
-4. **Guardar** la respuesta en `specs/SHARED-MEMORY.md` (bajo la fase y el id de pregunta).
+4. **Guardar** la respuesta en el `SHARED-MEMORY.md` de la sesión del alumno (`sessions/<slug>/SHARED-MEMORY.md`), bajo la fase y el id de pregunta.
 5. Solo entonces, pasar a la siguiente pregunta.
 
 Nunca dispares varias preguntas juntas ni generes el documento completo de una pasada. El valor pedagógico está en el ida y vuelta: el participante **descubre** las reglas respondiendo, no leyéndolas.
@@ -77,13 +77,13 @@ Si el participante corrige, reformula y vuelve a confirmar.
 ❓ ¿Todo correcto antes de continuar?
 ```
 
-Solo pasa de fase cuando el guard de esa fase esté cumplido (ver cada SKILL) y el participante confirme. Marca `ready_for_handoff: true` de la fase en `specs/SHARED-MEMORY.md`.
+Solo pasa de fase cuando el guard de esa fase esté cumplido (ver cada SKILL) y el participante confirme. Marca `ready_for_handoff: true` de la fase en `sessions/<slug>/SHARED-MEMORY.md`, y añade una entrada a `sessions/<slug>/discovery-log.md` con lo que se cubrió (es la documentación de la sesión).
 
 ## Reanudación
 
-Todo el estado vive en `specs/SHARED-MEMORY.md`. Al invocar `/discovery` (o `/spec`):
-- Si hay una fase en progreso, anuncia el punto exacto ("Continuando desde: Completitud — área Seguridad, pregunta 2") y sigue desde ahí.
-- Nunca reinicies desde cero si ya hay respuestas guardadas.
+Todo el estado vive en el `SHARED-MEMORY.md` de la sesión del alumno (`sessions/<slug>/SHARED-MEMORY.md`). Al invocar `/discovery` (o `/spec`):
+- Si ya existe una carpeta de sesión con una fase en progreso, anuncia el punto exacto ("Continuando la sesión de <nombre> desde: Completitud — área Seguridad, pregunta 2") y sigue desde ahí.
+- Nunca reinicies desde cero ni recrees la carpeta si ya hay respuestas guardadas.
 
 ## Regla de oro de confidencialidad
 

@@ -5,7 +5,7 @@ description: "Fase 1 del discovery BDD 2.0 Lite: entrevista al participante para
 
 # Fase 📝 Historias — Entrevista
 
-Sigue el protocolo en `../bdd-discovery/reference/interview-protocol.md` (una pregunta a la vez, validación, guardado en `specs/SHARED-MEMORY.md`).
+Sigue el protocolo en `../bdd-discovery/reference/interview-protocol.md` (una pregunta a la vez, validación, guardado en `sessions/<slug>/SHARED-MEMORY.md`).
 
 ## Objetivo
 
@@ -27,7 +27,7 @@ Antes de darla por buena, revisa con el participante (en prosa, no como checklis
 
 ## Salida
 
-Por cada historia acordada, crea/actualiza `specs/historias/US-XXX.md` con el formato "Como [rol] quiero [acción] para [beneficio]" + su nota INVEST. Registra los `story_id` en `specs/SHARED-MEMORY.md` bajo `historias_phase`.
+Por cada historia acordada, crea/actualiza `specs/historias/US-XXX.md` con el formato "Como [rol] quiero [acción] para [beneficio]" + su nota INVEST. Registra los `story_id` en `sessions/<slug>/SHARED-MEMORY.md` bajo `historias_phase`. Al cerrar la fase, añade una entrada a `sessions/<slug>/discovery-log.md` resumiendo las historias acordadas.
 
 ## Guard de fin de fase
 

@@ -43,7 +43,7 @@ validacion_smart:
 ## Importante
 
 - **No escribas Given-When-Then aquí.** Eso es la fase de Gherkin. Si el participante quiere adelantarse, recuérdale que primero cerramos los criterios en lenguaje de negocio.
-- Guarda cada criterio en el YAML apenas se acuerde; registra progreso en `specs/SHARED-MEMORY.md` (`criterios_phase`, con contador de historias completadas).
+- Guarda cada criterio en el YAML apenas se acuerde; registra progreso en `sessions/<slug>/SHARED-MEMORY.md` (`criterios_phase`, con contador de historias completadas). Al cerrar la fase, añade una entrada a `sessions/<slug>/discovery-log.md`.
 
 ## Guard de fin de fase
 

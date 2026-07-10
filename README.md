@@ -45,7 +45,7 @@ Trabajo individual — cada participante ejecuta el flujo completo en su propio 
    ```
    /discovery
    ```
-   Esto arranca la **entrevista** de discovery (una pregunta a la vez) sobre `specs/BRIEF.md`. Sigue con `/plan`, y luego `/test` → `/iterate` por cada iteración.
+   Esto arranca la **entrevista** de discovery (una pregunta a la vez) sobre `specs/BRIEF.md`. Lo primero que hace es preguntarte tu nombre y crear `sessions/<tu-nombre>/`, donde queda **documentada tu sesión de descubrimiento** (contexto, estado, bitácora, reporte de cobertura). Sigue con `/plan`, y luego `/test` → `/iterate` por cada iteración.
 
 ## El loop de comandos
 
@@ -57,7 +57,7 @@ Trabajo individual — cada participante ejecuta el flujo completo en su propio 
 /audit     → cobertura funcional y técnica: tu propio código vs tu propia spec
 ```
 
-`/discovery` (alias `/spec`) te entrevista fase por fase (Historias → Criterios SMART → Completitud enfocada → Gherkin) en vez de generar la spec de golpe; guarda estado en `specs/SHARED-MEMORY.md` y se retoma con `/discovery resume`.
+`/discovery` (alias `/spec`) te entrevista fase por fase (Historias → Criterios SMART → Completitud enfocada → Gherkin) en vez de generar la spec de golpe; documenta tu sesión en `sessions/<tu-nombre>/` (incluido el estado) y se retoma con `/discovery resume`.
 
 Cada commit pasa por un hook de pre-commit (`dotnet format` + `dotnet test`, y `npm test` si tocaste frontend) — si algo falla, el commit se bloquea hasta corregirlo.
 
@@ -75,7 +75,8 @@ fork → clone → feature/<tu-nombre> → commits por iteración → PR contra 
 src/               — Domain, Application, Infrastructure, Api (DDD light)
 tests/             — xUnit
 frontend/          — Vite + React + TS
-specs/             — BRIEF.md (input), SHARED-MEMORY.md (estado del discovery), SPEC.md/PLAN.md/criterios (los generas tú)
+specs/             — BRIEF.md (input), SPEC.md/PLAN.md/criterios (los generas tú)
+sessions/          — tu sesión de discovery documentada: sessions/<tu-nombre>/ (se crea al correr /discovery)
 features/          — Gherkin (los generas tú; ejemplo_formato.feature es solo referencia)
 docker-compose.yml — db + api + frontend
 ```

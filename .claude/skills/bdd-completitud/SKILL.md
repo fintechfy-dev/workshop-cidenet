@@ -45,7 +45,7 @@ Sondas (formula una a la vez, adapta el seguimiento a lo que responda):
 
 ## Por cada hueco descubierto
 
-Cuando el participante articule una regla nueva, agrégala al YAML de la historia correspondiente (`validaciones_reglas`, `manejo_errores` o `casos_edge` según el caso) y confírmasela. Registra el avance en `specs/SHARED-MEMORY.md` (`completitud_phase`, con el área en curso y las reglas añadidas — por descripción, no por ningún código).
+Cuando el participante articule una regla nueva, agrégala al YAML de la historia correspondiente (`validaciones_reglas`, `manejo_errores` o `casos_edge` según el caso) y confírmasela. Registra el avance en `sessions/<slug>/SHARED-MEMORY.md` (`completitud_phase`, con el área en curso y las reglas añadidas — por descripción, no por ningún código), y anótalo también en `sessions/<slug>/discovery-log.md` (esta bitácora es lo que el facilitador revisa para ver qué descubrió cada alumno).
 
 ## Guard de fin de fase
 

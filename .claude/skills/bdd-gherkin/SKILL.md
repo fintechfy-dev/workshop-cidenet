@@ -20,7 +20,7 @@ Estos escenarios **son los tests de aceptación** que luego alimentan `/test` en
 
 ## Paso 2 — Reporte DQS-lite (auditoría del discovery)
 
-Cierra con un reporte breve para el participante, en prosa, cubriendo:
+Escribe el reporte en `sessions/<slug>/dqs-lite.md` (y muéstraselo también al participante en el chat). En prosa, cubre:
 
 - **Cobertura por área de completitud:** para cada una de las 4 áreas (Seguridad, Auditoría, Usuarios/lifecycle, Testing), ¿quedó explorada con al menos una regla/escenario, o quedó floja? Nómbralas.
 - **Balance camino-feliz / camino-negativo:** ¿cada regla tiene su escenario que la viola, o hay reglas sin test negativo?
@@ -31,8 +31,8 @@ Cierra con un reporte breve para el participante, en prosa, cubriendo:
 ## Cierre del discovery
 
 1. Consolida `specs/SPEC.md` a partir de `specs/SPEC.template.md`: historias + reglas descubiertas + endpoints/pantallas esbozados + referencia a `specs/criterios/`.
-2. Marca `gherkin_phase.ready_for_handoff: true` y `project_state.current_phase: completed` en `specs/SHARED-MEMORY.md`.
-3. Avisa al participante que el discovery está completo y el siguiente paso es `/plan`.
+2. Marca `gherkin_phase.ready_for_handoff: true` y `project_state.current_phase: completed` en `sessions/<slug>/SHARED-MEMORY.md`, y añade la entrada de cierre a `sessions/<slug>/discovery-log.md`.
+3. Avisa al participante que el discovery está completo, que su sesión quedó documentada en `sessions/<slug>/`, y que el siguiente paso es `/plan`.
 
 ## Confidencialidad
 
