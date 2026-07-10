@@ -1,0 +1,18 @@
+# .NET
+bin/
+obj/
+*.user
+
+# Node / frontend
+node_modules/
+frontend/dist/
+frontend/.env
+
+# Editor / OS
+.vs/
+.vscode/
+.DS_Store
+Thumbs.db
+
+# Postgres data volume (if bind-mounted locally)
+pgdata/
