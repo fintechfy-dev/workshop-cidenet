@@ -1,6 +1,6 @@
 ---
 name: bdd-criterios
-description: "Fase 3 (Criterios) del discovery BDD 2.0: entrevista al participante para escribir criterios de aceptación SMART en YAML por cada historia. Invocada por bdd-discovery cuando current_phase = criterios. Una pregunta a la vez. NO genera Gherkin todavía."
+description: "Fase 3 (Criterios) del discovery BDD 2.0: entrevista al participante para escribir criterios de aceptación SMART en YAML por cada historia. Invocada por bdd-discovery cuando current_phase = criterios. Una pregunta a la vez. El Gherkin se genera en la etapa 5 (bdd-gherkin) a partir de estos criterios — aquí todavía no, es cuestión de secuencia."
 ---
 
 # Fase ⚡ Criterios — Entrevista
@@ -9,7 +9,7 @@ Sigue el protocolo en `../bdd-discovery/reference/interview-protocol.md`.
 
 ## Objetivo
 
-Por cada historia de la fase anterior, escribir junto con el participante los criterios de aceptación en **YAML** (lenguaje de negocio, no Gherkin todavía). Trabaja **historia por historia**, no todas a la vez.
+Por cada historia de la fase anterior, escribir junto con el participante los criterios de aceptación en **YAML** (lenguaje de negocio; el Gherkin viene después, en la etapa 5, a partir de estos criterios). Trabaja **historia por historia**, no todas a la vez.
 
 ## Formato de salida (un archivo por historia)
 
@@ -44,7 +44,7 @@ Presenta cada pregunta con **opciones candidatas + salida `✍️ Otra`** (ver p
 
 ## Importante
 
-- **No escribas Given-When-Then aquí.** Eso es la fase de Gherkin. Si el participante quiere adelantarse, recuérdale que primero cerramos los criterios en lenguaje de negocio.
+- **No escribas Given-When-Then aquí — todavía.** El Gherkin sí se genera, pero en la etapa 5 (bdd-gherkin), automáticamente desde estos criterios. Es secuencia, no exclusión: si el participante quiere adelantarse, recuérdale que primero cerramos los criterios en lenguaje de negocio y de ahí sale el Gherkin.
 - Guarda cada criterio en el YAML apenas se acuerde; registra progreso en `sessions/<slug>/SHARED-MEMORY.md` (`criterios_phase`, con contador de historias completadas). Al cerrar la fase, añade una entrada a `sessions/<slug>/discovery-log.md`.
 
 ## Guard de fin de fase
