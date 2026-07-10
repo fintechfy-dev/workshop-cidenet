@@ -6,8 +6,11 @@ Vas a construir un módulo de software **real** sin escribir el código a mano: 
 
 - VS Code con la extensión **Claude Code** (y tu suscripción activa)
 - **Docker Desktop** abierto y corriendo
+- **.NET 9 SDK** y **Node.js 22** instalados (para correr los tests del TDD)
 - **GitHub CLI (`gh`)** instalado → [cli.github.com](https://cli.github.com)
 - Una cuenta de **GitHub**
+
+> Todo corre **local**: la app en `docker compose`, y el desarrollo con tu SDK/Node. No hay que bajar ninguna imagen de entorno aparte.
 
 ## 1 · Trae el repo (es público, no necesitas permisos)
 
@@ -16,21 +19,21 @@ Clona la versión pública del repo:
 - **VS Code:** `Ctrl/Cmd + Shift + P` → **"Git: Clone"** → pega `https://github.com/fintechfy-dev/workshop-cidenet` → elige una carpeta.
 - ¿Prefieres terminal? `git clone https://github.com/fintechfy-dev/workshop-cidenet.git`
 
-## 2 · Abre el entorno (viene todo listo)
+## 2 · Levanta la app (local, con Docker)
 
-1. Abre la carpeta en VS Code → cuando aparezca el aviso, **"Reopen in Container"**.
-   > La primera vez baja una imagen (~1.7 GB). Si la pre-descargaste, es instantáneo.
-2. Levanta la app:
+1. Abre la carpeta en VS Code.
+2. Levanta el stack completo:
    ```bash
    docker compose up --build
    ```
+   > La primera vez, Docker baja Postgres y construye las imágenes de api/frontend. Tarda un poco, pero es una sola vez — y no descargas ninguna imagen de entorno aparte.
 3. Confirma que respira:
    - **API** → http://localhost:5000/health debe responder `{"status":"ok"}`
    - **App** → http://localhost:5173
 
 ## 3 · Conéctate a GitHub (para que Claude pilotee por ti)
 
-Ya estás dentro del contenedor — que es donde Claude trabaja. Autentícalo con GitHub **una vez**:
+Autentica `gh` con GitHub **una vez** (en la terminal de VS Code):
 
 ```bash
 gh auth login

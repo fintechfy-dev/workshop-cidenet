@@ -4,9 +4,10 @@
 set -euo pipefail
 
 INPUT=$(cat)
-COMMAND=$(echo "$INPUT" | jq -r '.tool_input.command // empty')
 
-if ! echo "$COMMAND" | grep -qE '(^|;|&&|\|)\s*git\s+commit'; then
+# Detectamos "git commit" en el campo command del JSON de entrada, sin jq
+# (así el hook funciona en cualquier máquina local, sin dependencias extra).
+if ! printf '%s' "$INPUT" | grep -qE '"command"[[:space:]]*:[[:space:]]*"[^"]*git[[:space:]]+commit'; then
   exit 0
 fi
 
