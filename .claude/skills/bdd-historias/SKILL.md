@@ -13,7 +13,7 @@ Derivar, junto con el participante, las historias de usuario del módulo (format
 
 ## Banco de preguntas (piso, no techo)
 
-Formula estas una por una, con el formato universal. Ajusta el total real según lo que responda.
+Formula estas una por una, con el formato universal — **cada una con opciones candidatas + salida `✍️ Otra`** (ver protocolo), para que el participante no arranque en blanco. Ajusta el total real según lo que responda.
 
 1. **🔍 Abierta — flujos principales.** "Mirando el brief, ¿cuáles son las acciones principales que un **admin** necesita hacer sobre los usuarios del sistema?" (pista: pensar en el ciclo de vida de una cuenta).
 2. **📊 Opción — alcance por rol.** "¿Qué rol quieres modelar primero en tus historias? A) admin, B) editor, C) viewer, D) los tres en paralelo." Úsalo para ordenar el trabajo.

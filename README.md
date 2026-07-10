@@ -20,8 +20,7 @@ Trabajo individual — cada participante ejecuta el flujo completo en su propio 
 
 - [ ] VS Code con la extensión de Claude Code, y suscripción activa.
 - [ ] Docker Desktop instalado y corriendo.
-- [ ] Cuenta de GitHub, sin bloqueo de VPN hacia GitHub.
-- [ ] **Fork de este repo** hecho con anticipación.
+- [ ] **GitHub CLI (`gh`)** instalado ([cli.github.com](https://cli.github.com)) y cuenta de GitHub, sin bloqueo de VPN. Autenticas `gh` durante el setup — eso le permite a **Claude pilotar git y GitHub por ti** (fork, commits, PRs), que es como se trabaja en este taller.
 - [ ] **Pre-pull de la imagen del devcontainer la noche del viernes** (pesa ~1.7GB):
   ```
   docker pull ghcr.io/fintechfy-dev/workshop-cidenet-devcontainer:latest
@@ -29,23 +28,25 @@ Trabajo individual — cada participante ejecuta el flujo completo en su propio 
 
 ## Quickstart
 
-1. **Fork** este repo (botón "Fork" arriba a la derecha en GitHub).
-2. Clona tu fork:
-   ```
-   git clone https://github.com/<tu-usuario>/workshop-cidenet.git
-   cd workshop-cidenet
-   ```
-3. Abre la carpeta en VS Code y elige **"Reopen in Container"** (usa la imagen pre-publicada, no la reconstruye).
-4. Dentro del devcontainer, levanta el stack completo:
+1. **Clona la versión pública** del repo (es público, no necesitas autenticarte para esto):
+   - **VS Code:** `Ctrl/Cmd+Shift+P` → **"Git: Clone"** → pega `https://github.com/fintechfy-dev/workshop-cidenet` → elige carpeta.
+   - O con terminal: `git clone https://github.com/fintechfy-dev/workshop-cidenet.git`
+2. Abre la carpeta en VS Code y elige **"Reopen in Container"** (usa la imagen pre-publicada, no la reconstruye).
+3. Dentro del devcontainer, levanta el stack completo:
    ```
    docker compose up --build
    ```
    Esto levanta tres servicios: `db` (Postgres vacío), `api` (que al arrancar corre las migraciones y **carga el seed de 5 usuarios de prueba**; `http://localhost:5000/health` debe responder `{"status":"ok"}`) y `frontend` (`http://localhost:5173`).
-5. Abre Claude Code y ejecuta tu primer comando:
+4. **Conéctate a GitHub** desde dentro del contenedor (donde corre Claude), una vez:
+   ```
+   gh auth login
+   ```
+   (GitHub.com → HTTPS → login con el navegador). Luego pídele a Claude: *"Haz un fork de este repo a mi cuenta y déjalo como mi origin."* — así Claude puede commitear y abrir tus PRs por ti. (Fallback sin `gh`: haz el fork por la web y agrega tu remoto a mano; Claude no podrá pilotar git.)
+5. Abre Claude Code, **carga el documento del caso** que te dieron, y ejecuta tu primer comando:
    ```
    /discovery
    ```
-   Esto arranca la **entrevista** de discovery (una pregunta a la vez) sobre `specs/BRIEF.md`. Lo primero que hace es preguntarte tu nombre y crear `sessions/<tu-nombre>/`, donde queda **documentada tu sesión de descubrimiento** (contexto, estado, bitácora, reporte de cobertura). Sigue con `/plan`, y luego `/test` → `/iterate` por cada iteración.
+   Esto arranca la **entrevista** de discovery (una pregunta a la vez). Lo primero que hace es preguntarte tu nombre y crear `sessions/<tu-nombre>/`, donde queda **documentada tu sesión de descubrimiento** (contexto, estado, bitácora, reporte de cobertura). Sigue con `/plan`, y luego `/test` → `/iterate` por cada iteración.
 
 ## El loop de comandos
 

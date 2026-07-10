@@ -24,7 +24,7 @@ Puntúa la épica dada con el participante, una pregunta por eje (o agrupa de a 
 - **Esfuerzo estimable** 📏 — ¿qué tan acotado y estimable es? (10 = muy acotado, 1 = enorme e incierto)
 - **Dependencias** 🔗 — ¿qué tan libre está de bloqueos externos? (10 = autónomo, 1 = muy dependiente)
 
-Para cada eje: formula la pregunta con el formato universal, espera la respuesta, valídala, y guarda el número en `sessions/<slug>/SHARED-MEMORY.md` (`epicas_phase.vuifed`).
+Para cada eje: formula la pregunta con el formato universal **ofreciendo opciones + salida `✍️ Otra`** (ej. para Valor: `A) 🔴 Crítico · B) 🟠 Alto · C) 🟡 Medio · D) 🟢 Bajo · ✍️ Otra`), traduce su elección a un número 1-10, espera la respuesta, valídala, y guárdala en `sessions/<slug>/SHARED-MEMORY.md` (`epicas_phase.vuifed`).
 
 ## Salida
 

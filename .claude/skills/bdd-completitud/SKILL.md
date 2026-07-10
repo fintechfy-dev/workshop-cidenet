@@ -7,9 +7,14 @@ description: "Fase 4 (clave) del discovery BDD 2.0: autocrítica sistemática re
 
 Sigue el protocolo en `../bdd-discovery/reference/interview-protocol.md`. **La regla de oro de confidencialidad aplica al máximo aquí:** haces preguntas que llevan al participante a darse cuenta de lo que falta — **nunca** enuncias la regla tú. Si preguntas "¿qué debería pasar si...?" y él responde con la regla, funcionó. Si tú dices "recuerda que la regla es...", arruinaste el ejercicio.
 
-**Envuelve cada sonda en el FORMATO DE PREGUNTA UNIVERSAL** (encabezado de área, "❓ PREGUNTA X — TIPO", emoji, "⏳ Esperando tu respuesta..."), una a la vez. Las sondas de abajo están en prosa por brevedad; tú las formulas con el formato completo.
+**Envuelve cada sonda en el FORMATO DE PREGUNTA UNIVERSAL** (encabezado de área, "❓ PREGUNTA X — TIPO", opciones A/B/C + `✍️ Otra`, "⏳ Esperando tu respuesta..."), una a la vez. Las sondas de abajo están en prosa por brevedad; tú las presentas con opciones candidatas + salida abierta.
 
-**Preferencia por preguntas abiertas.** Cuando una sonda pueda enunciar la respuesta, reformúlala como abierta ("¿qué debería pasar con...?"), no como cerrada que solo pide confirmar.
+**Opciones sin regalar la regla (crítico en esta fase).** Ofrece opciones para que el participante no se quede en blanco, pero:
+- Que las opciones sean **alternativas plausibles y balanceadas**, con **largo y detalle parejos** y **ninguna justificada** — que una opción sea más larga o "explicada" es lo que delata cuál es la correcta, más que un relleno absurdo.
+- Encabezado **sin denominador** aquí (`❓ PREGUNTA X`, no "X DE Y"): el número de huecos es desconocido y no debes insinuar un total.
+- **No marques cuál es la correcta** ni reacciones como si hubiera una respuesta esperada. Solo registra su elección.
+- Ejemplo bueno para "último admin": `A) se desactiva normalmente · B) se desactiva pero avisa · C) el sistema lo impide · ✍️ Otra`. El participante razona y elige; tú no dices cuál.
+- Si una opción enunciaría la regla de forma demasiado directa, déjala como pregunta abierta con ejemplos en vez de opciones cerradas.
 
 ## Objetivo
 
