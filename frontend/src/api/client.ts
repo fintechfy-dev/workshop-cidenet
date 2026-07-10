@@ -8,6 +8,5 @@ export async function checkHealth(): Promise<{ status: string }> {
   return response.json();
 }
 
-// TODO (ejercicio del taller): agregar aqui los metodos reales del cliente
-// (listUsers, createUser, updateUser, deleteUser, listRoles, updatePermissions...)
-// una vez que /discovery y /plan definan los endpoints del modulo.
+// TODO (ejercicio del taller): agrega aqui los metodos del cliente que
+// necesite tu caso, una vez que /discovery y /plan definan tus endpoints.

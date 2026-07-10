@@ -18,7 +18,7 @@ No dupliques ni resumas aquí el banco de preguntas ni las 10 áreas de completi
 
 ## Contexto que cargas
 
-- `specs/BRIEF.md`, `specs/SPEC.md`, `specs/criterios/`, `features/`, y la carpeta de sesión del alumno `sessions/<slug>/` (estado, contexto, bitácora).
+- El caso del alumno en `sessions/<slug>/caso.md`, `specs/SPEC.md`, `specs/criterios/`, `features/`, y la carpeta de sesión `sessions/<slug>/` (estado, contexto, bitácora).
 - `src/Domain/` — para reflejar en las entidades el modelo que surge del discovery (solo forma del dominio; la lógica de negocio la implementa el agente backend en `/iterate`).
 
 ## Lo que NO tocas

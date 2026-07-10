@@ -3,6 +3,6 @@ description: "Alias de /discovery. Arranca o reanuda la entrevista de discovery 
 argument-hint: "[resume — opcional]"
 ---
 
-Alias de `/discovery`. Hace exactamente lo mismo: invoca el skill **`bdd-discovery`** (`.claude/skills/bdd-discovery/SKILL.md`) para conducir la entrevista de discovery del módulo de usuarios, creando o reanudando la sesión del alumno en `sessions/<slug>/`.
+Alias de `/discovery`. Hace exactamente lo mismo: invoca el skill **`bdd-discovery`** (`.claude/skills/bdd-discovery/SKILL.md`) para conducir la entrevista de discovery sobre el caso que aporta el alumno, creando o reanudando la sesión en `sessions/<slug>/`.
 
 Existe porque algunas slides del taller nombran el comando como `/spec` y otras como `/discovery` — ambos funcionan igual.

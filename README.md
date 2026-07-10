@@ -1,10 +1,12 @@
-# workshop-cidenet — Taller AI-First: Módulo de Usuarios, Roles y Permisos
+# workshop-cidenet — Taller AI-First
 
-Taller práctico de 2 sesiones donde vas a ejecutar, sobre un módulo real, el flujo completo de desarrollo asistido por IA: **discovery (BDD 2.0, 5 etapas) → auditoría del discovery → looping engineering (TDD) → auditoría de implementación**. El producto del taller es el flujo — el módulo es solo el vehículo para practicarlo.
+Taller práctico de 2 sesiones donde vas a ejecutar, sobre un caso de negocio real, el flujo completo de desarrollo asistido por IA: **discovery (BDD 2.0, 5 etapas) → auditoría del discovery → looping engineering (TDD) → auditoría de implementación**. El producto del taller es el flujo — el caso es solo el vehículo para practicarlo.
+
+> **El repo no incluye ningún caso de negocio a propósito.** Es una plantilla reutilizable: tu facilitador te entrega el caso como un documento aparte, que cargas en el chat al iniciar el discovery. Así el mismo taller sirve para cualquier caso, y el descubrimiento es real (ni el repo ni Claude entran sabiendo las respuestas).
 
 ## Qué vas a construir
 
-Un módulo de administración de usuarios con roles y permisos (backend .NET 9 + Postgres, frontend React), a partir de un brief deliberadamente incompleto. Vas a usar Claude Code para descubrir las reglas de negocio que faltan, generar Gherkin, escribir tests antes que el código, implementar, y auditar tu propio trabajo — todo dentro de tu propio fork.
+El módulo que salga del caso que te entreguen (backend .NET 9 + Postgres, frontend React), partiendo de un scaffold que trae la **plomería** lista (4 capas compilando, EF+Postgres, Docker, `/health` + test) pero **sin dominio** — el dominio lo construyes tú. Vas a usar Claude Code para descubrir la spec desde el caso, generar Gherkin, escribir tests antes que el código, implementar, y auditar tu propio trabajo — todo dentro de tu propio fork.
 
 ## Agenda
 
@@ -34,7 +36,7 @@ Trabajo individual — cada participante ejecuta el flujo completo en su propio 
    ```
    docker compose up --build
    ```
-   La primera vez, Docker baja Postgres y construye las imágenes de api/frontend (tarda un poco; es una sola vez). Levanta tres servicios: `db` (Postgres vacío), `api` (que al arrancar corre las migraciones y **carga el seed de 5 usuarios de prueba**; `http://localhost:5000/health` debe responder `{"status":"ok"}`) y `frontend` (`http://localhost:5173`).
+   La primera vez, Docker baja Postgres y construye las imágenes de api/frontend (tarda un poco; es una sola vez). Levanta tres servicios: `db` (Postgres vacío), `api` (`http://localhost:5000/health` debe responder `{"status":"ok"}`) y `frontend` (`http://localhost:5173`). La base arranca vacía — tú creas tu esquema con migraciones cuando modeles tu dominio.
 3. **Conéctate a GitHub** una vez:
    ```
    gh auth login
@@ -49,7 +51,7 @@ Trabajo individual — cada participante ejecuta el flujo completo en su propio 
 ## El loop de comandos
 
 ```
-/discovery → entrevista BDD 2.0 (5 etapas) → specs/EPIC-001 + specs/historias/ + specs/criterios/*.yaml + features/*.feature + specs/SPEC.md
+/discovery → entrevista BDD 2.0 (5 etapas) → specs/epicas/ + specs/historias/ + specs/criterios/*.yaml + features/*.feature + specs/SPEC.md
 /plan      → specs/PLAN.md (iteraciones con "Done-when")
 /test      → tests desde Gherkin (tests primero)
 /iterate   → implementa hasta que pasen, commitea
@@ -72,15 +74,15 @@ fork → clone → feature/<tu-nombre> → 1 commit por iteración (tests en ver
 
 ```
 .claude/           — skills (BDD 2.0, 5 etapas), agentes, comandos, hook de pre-commit
-src/               — Domain, Application, Infrastructure, Api (DDD light)
+src/               — Domain, Application, Infrastructure, Api (DDD light, plomería sin dominio)
 tests/             — xUnit
-frontend/          — Vite + React + TS
-specs/             — BRIEF.md (input), SPEC.md/PLAN.md/criterios (los generas tú)
+frontend/          — Vite + React + TS (App mínimo; construyes tus pantallas)
+specs/             — BRIEF.md (nota: el caso lo trae tu facilitador), SPEC.md/PLAN.md/criterios (los generas tú)
 sessions/          — tu sesión de discovery documentada: sessions/<tu-nombre>/ (se crea al correr /discovery)
 features/          — Gherkin (los generas tú; ejemplo_formato.feature es solo referencia)
 docker-compose.yml — db + api + frontend
 ```
 
-## Una nota sobre el brief
+## Una nota sobre el caso
 
-`specs/BRIEF.md` está incompleto a propósito. No es un error ni falta de detalle — es el punto de partida real del ejercicio. Si algo no está especificado, es tu trabajo (con ayuda de Claude Code en `/discovery`) descubrirlo, no adivinarlo de una sola leída.
+El repo **no trae ningún caso de negocio** — a propósito (ver `specs/BRIEF.md`). Tu facilitador te lo entrega como un documento aparte; lo cargas en el chat al iniciar `/discovery`. El caso es deliberadamente incompleto: descubrir lo que falta, con ayuda de Claude Code, es el ejercicio.

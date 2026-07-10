@@ -1,6 +1,6 @@
-# SPEC — [Nombre del módulo]
+# SPEC — [Nombre de tu caso]
 
-> Generado por `/discovery` a partir de `specs/BRIEF.md`. Este documento es la especificación técnica completa: historias, criterios de aceptación y reglas de negocio, ya validados con el equipo (o contigo mismo, en este taller).
+> Generado por `/discovery` a partir del caso que aportaste. Este documento es la especificación técnica completa: historias, criterios de aceptación y reglas de negocio, ya validados contigo durante la entrevista.
 
 ## Historias de usuario
 
@@ -9,7 +9,7 @@
 
 ## Reglas de negocio
 
-Lista de todas las reglas descubiertas durante `/discovery` (las del brief + las que salieron de la completitud enfocada en Seguridad/Auditoría/Usuarios/Testing). Cada regla en una frase verificable:
+Lista de todas las reglas descubiertas durante `/discovery` (las explícitas de tu caso + las que salieron de la fase de Completitud). Cada regla en una frase verificable:
 
 - [Regla 1]
 - [Regla 2]
@@ -23,18 +23,12 @@ Lista de todas las reglas descubiertas durante `/discovery` (las del brief + las
 
 ## Pantallas
 
-Para cada una de las 4 pantallas del brief: campos, validaciones visibles, estados (carga/error/éxito).
+Para cada pantalla que tu caso necesite: campos, validaciones visibles, estados (carga/error/éxito).
 
-### Tabla de usuarios
+### [Pantalla 1]
 - ...
 
-### Formulario de creación/edición
-- ...
-
-### Matriz de permisos
-- ...
-
-### Confirmación de eliminación
+### [Pantalla 2]
 - ...
 
 ## Criterios de aceptación (YAML)
@@ -43,4 +37,4 @@ Ver `specs/criterios/` — un archivo YAML por historia, con el formato de categ
 
 ## Cobertura (DQS-lite)
 
-Reporte de `/discovery` sobre qué tan cubiertas quedaron las 4 áreas de completitud enfocada (Seguridad, Auditoría, Usuarios, Testing) y el balance camino-feliz / camino-negativo. Sin comparar contra un número objetivo — eso lo hacen los facilitadores.
+Reporte de `/discovery` sobre qué tan cubiertas quedaron las 10 áreas del ciclo de vida (CFG/USR/SEC/AUD/MON/INT/MNT/RPT/BCK/TST) y el balance camino-feliz / camino-negativo. Sin comparar contra un número objetivo — eso lo hacen los facilitadores.
