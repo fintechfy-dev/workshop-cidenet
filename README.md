@@ -12,41 +12,49 @@ El módulo que salga del caso que te entreguen (backend .NET 9 + Postgres, front
 
 | Sesión | Cuándo | Qué hacen |
 |---|---|---|
-| Setup | Antes del viernes | Instalar prerequisitos + clone + primer `docker compose up` local |
-| Sesión 1 | Viernes 5-7pm | Teoría + setup en vivo + arranque de `/discovery` |
-| Sesión 2 | Sábado 8am-12pm | Reglas de negocio, endpoints, frontend, Docker, PR y auditoría |
+| Día 1 | Viernes 5-7pm | Teoría + **discovery** (setup mínimo, cero infra) |
+| Día 2 | Sábado 8am-12pm | Infra (1ª iteración) + construcción por iteraciones (TDD + GitFlow) + auditoría |
 
-Trabajo individual — cada participante ejecuta el flujo completo en su propio fork.
+Trabajo individual — cada participante ejecuta el flujo completo en su propio fork. Guía paso a paso para el alumno: [EMPIEZA-AQUI.md](EMPIEZA-AQUI.md).
 
-## Prerrequisitos (antes del viernes)
+## Prerrequisitos
 
-- [ ] VS Code con la extensión de Claude Code, y suscripción activa.
-- [ ] **Docker Desktop** instalado y corriendo (corre la app con `docker compose`).
-- [ ] **.NET 9 SDK** y **Node.js 22** instalados localmente (para el loop de TDD: `dotnet test`, `npm test`).
-- [ ] **GitHub CLI (`gh`)** instalado ([cli.github.com](https://cli.github.com)) y cuenta de GitHub, sin bloqueo de VPN. Autenticas `gh` durante el setup — eso le permite a **Claude pilotar git y GitHub por ti** (fork, commits, PRs), que es como se trabaja en este taller.
+**Para el Día 1 (discovery):** solo VS Code con la extensión de Claude Code (y suscripción activa) + el repo clonado. Nada de infra.
+
+**Para el Día 2 (construcción), instálalo la noche del viernes:**
+
+- [ ] **Docker Desktop** (corre la app con `docker compose`).
+- [ ] **.NET 9 SDK** y **Node.js 22** (para el loop de TDD: `dotnet test`, `npm test`).
+- [ ] **GitHub CLI (`gh`)** ([cli.github.com](https://cli.github.com)) y cuenta de GitHub, sin bloqueo de VPN. Autenticas `gh` el sábado — eso le permite a **Claude pilotar git y GitHub por ti** (fork, commits, PRs).
 
 > Todo corre **local**: la app en `docker compose` (Docker baja Postgres y construye api/frontend), y el loop de desarrollo con tu SDK/Node local. No hay que descargar ninguna imagen de entorno aparte.
 
 ## Quickstart
 
-1. **Clona la versión pública** del repo (es público, no necesitas autenticarte para esto):
+**Día 1 — Discovery (setup mínimo):**
+
+1. **Clona la versión pública** del repo (no necesitas autenticarte):
    - **VS Code:** `Ctrl/Cmd+Shift+P` → **"Git: Clone"** → pega `https://github.com/fintechfy-dev/workshop-cidenet` → elige carpeta.
    - O con terminal: `git clone https://github.com/fintechfy-dev/workshop-cidenet.git`
-2. Abre la carpeta en VS Code. Levanta el stack completo (local):
-   ```
-   docker compose up --build
-   ```
-   La primera vez, Docker baja Postgres y construye las imágenes de api/frontend (tarda un poco; es una sola vez). Levanta tres servicios: `db` (Postgres vacío), `api` (`http://localhost:5000/health` debe responder `{"status":"ok"}`) y `frontend` (`http://localhost:5173`). La base arranca vacía — tú creas tu esquema con migraciones cuando modeles tu dominio.
-3. **Conéctate a GitHub** una vez:
-   ```
-   gh auth login
-   ```
-   (GitHub.com → HTTPS → login con el navegador). Luego pídele a Claude: *"Haz un fork de este repo a mi cuenta y déjalo como mi origin."* — así Claude puede commitear y abrir tus PRs por ti. (Fallback sin `gh`: haz el fork por la web y agrega tu remoto a mano; Claude no podrá pilotar git.)
-4. Abre Claude Code, **carga el documento del caso** que te dieron, y ejecuta tu primer comando:
+2. Abre Claude Code en la carpeta, **carga el documento del caso** que te dieron, y ejecuta:
    ```
    /discovery
    ```
-   Esto arranca la **entrevista** de discovery (una pregunta a la vez). Lo primero que hace es preguntarte tu nombre y crear `sessions/<tu-nombre>/`, donde queda **documentada tu sesión de descubrimiento** (contexto, estado, bitácora, reporte de cobertura). Sigue con `/plan`, y luego `/test` → `/iterate` por cada iteración.
+   Tu discovery queda guardado en archivos (`sessions/<tu-nombre>/`) — hoy no necesitas commitear ni levantar nada.
+
+**Día 2 — Construcción (infra + TDD/GitFlow):**
+
+3. **Conéctate a GitHub** una vez (así Claude commitea y abre tus PRs):
+   ```
+   gh auth login
+   ```
+   (GitHub.com → HTTPS → login con el navegador). Luego pídele a Claude: *"Haz un fork de este repo a mi cuenta y déjalo como mi origin."*
+4. **Levanta la infra** (puede ser tu 1ª iteración del plan):
+   ```
+   docker compose up --build
+   ```
+   Levanta `db` (Postgres vacío), `api` (`http://localhost:5000/health` → `{"status":"ok"}`) y `frontend` (`http://localhost:5173`). La base arranca vacía — tú creas tu esquema con migraciones cuando modeles tu dominio.
+5. Construye por iteraciones con `/plan` → `/test` → `/iterate` → `/audit` (ver el loop abajo).
 
 ## El loop de comandos
 
