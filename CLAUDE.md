@@ -5,12 +5,15 @@ Instrucciones de proyecto para Claude Code en `workshop-cidenet`. Este es el rep
 ## El loop de este taller
 
 ```
-/discovery → specs/SPEC.md + features/*.feature
+/discovery → entrevista BDD 2.0 Lite (una pregunta a la vez) →
+             specs/SPEC.md + specs/criterios/*.yaml + features/*.feature
 /plan      → specs/PLAN.md (iteraciones con "Done-when")
 /test      → tests desde los Gherkin (tests primero)
 /iterate   → implementa hasta que pasen los tests de la iteración, commitea
-/audit     → cobertura funcional y técnica de tu propio código vs tu propia spec
+/audit     → cobertura funcional y técnica: tu propio código vs tu propia spec
 ```
+
+`/discovery` (o su alias `/spec`) **no genera la spec de una pasada** — te entrevista fase por fase (Historias → Criterios SMART → Completitud enfocada → Gherkin), guardando el estado en `specs/SHARED-MEMORY.md` para poder reanudar con `/discovery resume`. La mecánica vive en `.claude/skills/bdd-discovery/`.
 
 Repite `/test` → `/iterate` por cada iteración del plan. El commit de cada iteración pasa por un hook de pre-commit que corre `dotnet format` + `dotnet test` (y `npm test` si tocaste `frontend/`) — si algo falla, el commit se bloquea.
 
@@ -22,9 +25,10 @@ Repite `/test` → `/iterate` por cada iteración del plan. El commit de cada it
 
 - `src/Domain`, `src/Application`, `src/Infrastructure`, `src/Api` — las 4 capas (DDD light). Domain trae las entidades `User`/`Role`/`Permission` con su forma básica; la lógica de negocio (invariantes, validaciones, reglas) la construyes tú.
 - `frontend/` — Vite + React + TS, con las 4 pantallas del brief como stubs (`src/pages/`). Conéctalas al API real durante tu iteración de frontend.
-- `specs/` — `BRIEF.md` (input), `SPEC.md`/`PLAN.md` (los generas tú con `/discovery` y `/plan`).
+- `specs/` — `BRIEF.md` (input), `SHARED-MEMORY.md` (estado del discovery, ya inicializado), `SPEC.md`/`PLAN.md` y `criterios/*.yaml` (los generas tú con `/discovery` y `/plan`).
 - `features/` — Gherkin. `ejemplo_formato.feature` es solo referencia de formato (dominio de biblioteca, no el módulo real) — bórralo cuando generes tus propios `.feature`.
 - `.claude/agents/` — 4 agentes especializados (arquitecto, backend, frontend, calidad), cada uno enfocado en su capa.
+- `.claude/skills/bdd-*` — la máquina de discovery BDD 2.0 Lite (orquestador + fases + protocolo de entrevista). `.claude/commands/` — los 5 comandos del loop (`/discovery`+`/spec`, `/plan`, `/test`, `/iterate`, `/audit`).
 
 ## Convenciones
 

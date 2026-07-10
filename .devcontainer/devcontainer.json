@@ -7,7 +7,7 @@
     "source=/var/run/docker.sock,target=/var/run/docker.sock,type=bind"
   ],
   "forwardPorts": [5000, 5173, 5433],
-  "postCreateCommand": "dotnet restore workshop-cidenet.sln && (cd frontend && npm install)",
+  "postCreateCommand": "dotnet restore workshop-cidenet.slnx && (cd frontend && npm install)",
   "customizations": {
     "vscode": {
       "extensions": [

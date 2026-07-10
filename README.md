@@ -40,22 +40,24 @@ Trabajo individual — cada participante ejecuta el flujo completo en su propio 
    ```
    docker compose up --build
    ```
-   Esto levanta `db` (Postgres, con el seed de 5 usuarios de prueba ya cargado), `api` (`http://localhost:5000/health` debe responder `{"status":"ok"}`) y `frontend` (`http://localhost:5173`).
+   Esto levanta tres servicios: `db` (Postgres vacío), `api` (que al arrancar corre las migraciones y **carga el seed de 5 usuarios de prueba**; `http://localhost:5000/health` debe responder `{"status":"ok"}`) y `frontend` (`http://localhost:5173`).
 5. Abre Claude Code y ejecuta tu primer comando:
    ```
    /discovery
    ```
-   Esto lee `specs/BRIEF.md` y arranca el ciclo. Sigue con `/plan`, y luego `/test` → `/iterate` por cada iteración.
+   Esto arranca la **entrevista** de discovery (una pregunta a la vez) sobre `specs/BRIEF.md`. Sigue con `/plan`, y luego `/test` → `/iterate` por cada iteración.
 
 ## El loop de comandos
 
 ```
-/discovery → specs/SPEC.md + criterios YAML + features/*.feature
+/discovery → entrevista BDD 2.0 Lite → specs/SPEC.md + specs/criterios/*.yaml + features/*.feature
 /plan      → specs/PLAN.md (iteraciones con "Done-when")
 /test      → tests desde Gherkin (tests primero)
 /iterate   → implementa hasta que pasen, commitea
-/audit     → cobertura funcional y técnica de tu propia spec vs tu propio código
+/audit     → cobertura funcional y técnica: tu propio código vs tu propia spec
 ```
+
+`/discovery` (alias `/spec`) te entrevista fase por fase (Historias → Criterios SMART → Completitud enfocada → Gherkin) en vez de generar la spec de golpe; guarda estado en `specs/SHARED-MEMORY.md` y se retoma con `/discovery resume`.
 
 Cada commit pasa por un hook de pre-commit (`dotnet format` + `dotnet test`, y `npm test` si tocaste frontend) — si algo falla, el commit se bloquea hasta corregirlo.
 
@@ -69,11 +71,11 @@ fork → clone → feature/<tu-nombre> → commits por iteración → PR contra 
 
 ```
 .devcontainer/     — imagen de desarrollo (ya publicada en GHCR)
-.claude/           — agentes, comandos, hook de pre-commit
+.claude/           — skills (BDD 2.0 Lite), agentes, comandos, hook de pre-commit
 src/               — Domain, Application, Infrastructure, Api (DDD light)
 tests/             — xUnit
 frontend/          — Vite + React + TS
-specs/             — BRIEF.md (input), SPEC.md/PLAN.md (los generas tú)
+specs/             — BRIEF.md (input), SHARED-MEMORY.md (estado del discovery), SPEC.md/PLAN.md/criterios (los generas tú)
 features/          — Gherkin (los generas tú; ejemplo_formato.feature es solo referencia)
 docker-compose.yml — db + api + frontend
 ```

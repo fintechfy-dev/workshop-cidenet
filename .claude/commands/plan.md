@@ -2,6 +2,8 @@
 description: "Genera specs/PLAN.md: iteraciones numeradas con Done-when, a partir de specs/SPEC.md y features/*.feature."
 ---
 
+La planificación es transversal (no pertenece a ninguna de las 4 capas de los agentes arquitecto/backend/frontend/calidad), así que este comando no delega en un agente específico — lo ejecutas directamente.
+
 Lee `specs/SPEC.md` y todos los `features/*.feature` generados por `/discovery`. Genera `specs/PLAN.md` usando `specs/PLAN.template.md` como formato:
 
 - Divide el trabajo en iteraciones pequeñas y verificables — cada una con un **Done-when concreto** ("tests de X pasando", no "backend listo").
