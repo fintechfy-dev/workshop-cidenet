@@ -20,12 +20,12 @@ Vas a construir un módulo de software **real** sin escribir el código a mano: 
 
 > Docker, .NET SDK, Node y `gh` los necesitas **mañana**, no hoy. Hoy solo descubrimos.
 
-## 1 · Trae el repo (es público)
+## 1 · Haz fork y clona tu copia
 
-Clona la versión pública del repo:
+1. **Fork:** en [github.com/fintechfy-dev/workshop-cidenet](https://github.com/fintechfy-dev/workshop-cidenet) → botón **"Fork"** → **"Create fork"**. Ya tienes tu propia copia.
+2. **Clónala:** en VS Code, `Ctrl/Cmd + Shift + P` → **"Git: Clone"** → pega la URL de **tu fork** → elige una carpeta. (O terminal: `git clone https://github.com/TU-USUARIO/workshop-cidenet.git`.)
 
-- **VS Code:** `Ctrl/Cmd + Shift + P` → **"Git: Clone"** → pega `https://github.com/fintechfy-dev/workshop-cidenet` → elige una carpeta.
-- O con terminal: `git clone https://github.com/fintechfy-dev/workshop-cidenet.git`
+> ¿No tienes tu cuenta de GitHub lista? Clona directo el repo público (`https://github.com/fintechfy-dev/workshop-cidenet`) y forkeas mañana.
 
 ## 2 · Arranca tu discovery
 
@@ -55,11 +55,11 @@ Al cerrar el Día 1 tendrás tu **spec ejecutable** (`features/*.feature`) lista
 
 ## 3 · Prepara git e infra (tu primera iteración)
 
-1. Autentica `gh` una vez (así **Claude pilotea git y GitHub por ti** — fork, commits, PRs):
+1. Autentica `gh` una vez (así **Claude commitea y abre tus PRs por ti**):
    ```
    gh auth login
    ```
-   (GitHub.com → HTTPS → login con el navegador). Luego pídele a Claude: *"Haz un fork de este repo a mi cuenta y déjalo como mi origin."*
+   (GitHub.com → HTTPS → login con el navegador). Si en el Día 1 clonaste el repo público (sin fork), pídele ahora a Claude: *"Haz un fork de este repo a mi cuenta y déjalo como mi origin."*
 2. **Levanta la infraestructura** — puede ser tu primera iteración del plan:
    ```
    docker compose up --build

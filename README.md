@@ -33,9 +33,7 @@ Trabajo individual — cada participante ejecuta el flujo completo en su propio 
 
 **Día 1 — Discovery (setup mínimo):**
 
-1. **Clona la versión pública** del repo (no necesitas autenticarte):
-   - **VS Code:** `Ctrl/Cmd+Shift+P` → **"Git: Clone"** → pega `https://github.com/fintechfy-dev/workshop-cidenet` → elige carpeta.
-   - O con terminal: `git clone https://github.com/fintechfy-dev/workshop-cidenet.git`
+1. **Haz fork y clona tu copia:** botón **"Fork"** en GitHub → **"Create fork"**, luego clona **tu fork** (VS Code: `Ctrl/Cmd+Shift+P` → "Git: Clone" → URL de tu fork). ¿Sin cuenta lista? Clona directo el público `https://github.com/fintechfy-dev/workshop-cidenet` y forkeas el Día 2.
 2. Abre Claude Code en la carpeta, **carga el documento del caso** que te dieron, y ejecuta:
    ```
    /discovery
