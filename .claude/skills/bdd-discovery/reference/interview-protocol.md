@@ -1,4 +1,4 @@
-# Protocolo de Entrevista — BDD 2.0 Lite
+# Protocolo de Entrevista — BDD 2.0
 
 Reglas de interacción que **todos** los skills de discovery del taller siguen. Autocontenido: no depende de ningún repo externo. Condensado del framework BDD 2.0 original.
 
@@ -23,7 +23,7 @@ Nunca dispares varias preguntas juntas ni generes el documento completo de una p
 
 ## Emojis de contexto
 
-Fases: 📝 Historias · ⚡ Criterios · 🔍 Completitud · 🔧 Gherkin
+Fases: 🎯 Épicas · 📝 Historias · ⚡ Criterios · 🔍 Completitud · 🔧 Gherkin
 Estados: ✅ Completado · 🔄 En progreso · ⏳ Pendiente · ❌ Bloqueado
 Dominios: 👥 Usuarios · ⚙️ Procesos · 📊 Datos · 🔒 Seguridad · 🗃️ Auditoría · 🧪 Testing
 

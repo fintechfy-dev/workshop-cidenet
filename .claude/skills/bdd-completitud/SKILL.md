@@ -1,58 +1,77 @@
 ---
 name: bdd-completitud
-description: "Fase 3 (clave) del discovery BDD 2.0 Lite: entrevista de completitud enfocada en 4 áreas (Seguridad, Auditoría, Usuarios/lifecycle, Testing) para que el participante DESCUBRA las reglas de negocio que el brief no dice. Invocada por bdd-discovery cuando current_phase = completitud. Una pregunta a la vez; nunca dictar la regla, siempre preguntar."
+description: "Fase 4 (clave) del discovery BDD 2.0: autocrítica sistemática recorriendo las 10 áreas del ciclo de vida (CFG/USR/SEC/AUD/MON/INT/MNT/RPT/BCK/TST) para que el participante DESCUBRA lo que el brief no dice. Genera historias de gap US-XXX-AREA clasificadas 🔥/⚡/💡. Invocada por bdd-discovery cuando current_phase = completitud. Una pregunta a la vez; nunca dictar la regla, siempre preguntar."
 ---
 
-# Fase 🔍 Completitud Enfocada — Entrevista (la fase clave del taller)
+# Fase 🔍 Completitud — Autocrítica por las 10 Áreas del Ciclo de Vida (fase clave del taller)
 
-Sigue el protocolo en `../bdd-discovery/reference/interview-protocol.md`. **La regla de oro de confidencialidad aplica al máximo aquí:** tu trabajo es hacer preguntas que lleven al participante a darse cuenta de reglas que el brief no menciona — **nunca** enunciar la regla tú. Si preguntas "¿qué debería pasar si...?" y él responde con la regla, funcionó. Si tú dices "recuerda que la regla es...", arruinaste el ejercicio.
+Sigue el protocolo en `../bdd-discovery/reference/interview-protocol.md`. **La regla de oro de confidencialidad aplica al máximo aquí:** haces preguntas que llevan al participante a darse cuenta de lo que falta — **nunca** enuncias la regla tú. Si preguntas "¿qué debería pasar si...?" y él responde con la regla, funcionó. Si tú dices "recuerda que la regla es...", arruinaste el ejercicio.
+
+**Envuelve cada sonda en el FORMATO DE PREGUNTA UNIVERSAL** (encabezado de área, "❓ PREGUNTA X — TIPO", emoji, "⏳ Esperando tu respuesta..."), una a la vez. Las sondas de abajo están en prosa por brevedad; tú las formulas con el formato completo.
+
+**Preferencia por preguntas abiertas.** Cuando una sonda pueda enunciar la respuesta, reformúlala como abierta ("¿qué debería pasar con...?"), no como cerrada que solo pide confirmar.
 
 ## Objetivo
 
-El brief cubre lo obvio. Esta fase recorre cuatro áreas donde suelen esconderse requisitos que el participante no pensó, y por cada hueco que él descubra, se añade un criterio nuevo a los YAML de la historia correspondiente (en `validaciones_reglas`, `manejo_errores` o `casos_edge`).
+El brief cubre lo obvio. Recorre las **10 áreas** buscando lo que falta. Por cada hueco que el participante descubra:
+1. Si es una regla/validación de una historia existente → agrégala al YAML de esa historia (`validaciones_reglas`, `manejo_errores` o `casos_edge`).
+2. Si es funcionalidad nueva que amerita su propia historia → crea una **historia de gap** `specs/historias/US-XXX-<AREA>.md` (ej. `US-001-SEC`), con `origin: analisis_completitud` y el área.
+3. **Clasifica cada gap:** 🔥 Crítico (rompe seguridad/integridad; va sí o sí) · ⚡ Importante (debería estar en el MVP) · 💡 Mejora (nice-to-have).
 
-Trabaja **área por área**. En cada área, haz preguntas abiertas o cerradas-con-seguimiento, una a la vez, y deja que las respuestas del participante generen los criterios. Sigue sondeando mientras aparezcan huecos; no hay un número fijo de reglas a encontrar — la meta es que cada área quede explorada, no llegar a una cifra.
+Trabaja **área por área**. No hay un número fijo de reglas a encontrar; la meta es que las 10 áreas queden recorridas. Algunas áreas tendrán varios gaps, otras ninguno — está bien.
 
-**Envuelve cada sonda en el FORMATO DE PREGUNTA UNIVERSAL del protocolo** (encabezado de fase, "❓ PREGUNTA X — TIPO", emoji de dominio, "⏳ Esperando tu respuesta...") — no las dispares como bullets sueltos. Las sondas de abajo están redactadas en prosa por brevedad; tú las formulas con el formato completo, una a la vez.
+## Las 10 áreas
 
-**Preferencia por preguntas abiertas.** Cuando una sonda pueda enunciar la respuesta, reformúlala como abierta. No preguntes "¿esto también debería estar prohibido, sí?" (eso regala la regla y solo pide confirmar) — pregunta "¿qué debería pasar con...?" y deja que el participante lo deduzca.
+### CFG · ⚙️ Configuración
+- "¿Hay algo del módulo que debería ser configurable en vez de estar fijo en código (ej. la definición de roles, la matriz de permisos)? ¿Quién y cómo lo cambia?"
 
-## Área 1 · 🔒 Seguridad / autorización
+### USR · 👥 Usuarios / Permisos (ciclo de vida)
+- "¿Qué debería pasar en los **límites** del ciclo de vida de un usuario — el último de un tipo, el único que queda?"
+- "'Desactivar' un usuario y 'eliminar' un usuario, ¿son lo mismo o comportamientos distintos con reglas distintas?"
+- "¿Hay algún invariante que **nunca** pueda romperse con operaciones válidas (ej. quedarse sin cierto tipo de usuario, o alguien sin ningún rol)?"
+- "Quitarle un rol a un usuario, ¿tiene los mismos límites que eliminarlo, o límites propios?"
 
-Sondas (formula una a la vez, adapta el seguimiento a lo que responda):
+### SEC · 🔒 Seguridad / autorización
 - "Para cada acción sobre usuarios (crear, editar, borrar, asignar rol), ¿**quién** debería poder ejecutarla? ¿Todos los roles, o solo alguno?"
-- "¿Qué debería pasar si un usuario intenta hacer una acción **sobre sí mismo** que normalmente cambia privilegios — por ejemplo, cambiarse su propio rol o sus permisos?"
-- "Cuando el sistema devuelve los datos de un usuario en una respuesta, ¿hay algún campo que **nunca** debería salir ahí?"
-- "La contraseña al crear un usuario: ¿aceptas cualquier texto, o debería cumplir algún requisito mínimo?" → si menciona solo longitud, sigue con un seguimiento abierto: "además del largo, ¿algo más que la haga fuerte?" (para que emerja mayúscula/número si aplica, sin dictárselo).
+- "¿Qué debería pasar si un usuario intenta una acción **sobre sí mismo** que cambia sus privilegios (cambiarse el rol, darse permisos)?"
+- "Cuando el API devuelve los datos de un usuario, ¿hay algún campo que **nunca** debería salir en la respuesta?"
+- "La contraseña al crear un usuario: ¿aceptas cualquier texto o debería cumplir un mínimo?" → si solo menciona longitud, sigue: "además del largo, ¿algo más que la haga fuerte?".
 
-## Área 2 · 🗃️ Auditoría / integridad de datos
+### AUD · 🗃️ Auditoría / integridad
+- "Cuando se elimina un usuario, ¿qué debería pasar con las relaciones que tenía (las que lo vinculan a sus roles)?" (abierta — no ofrezcas tú "huérfanas / se limpian").
+- "El brief dice 3 roles predefinidos que no se crean. Pensando en esos roles, ¿qué operaciones deberían permitirse sobre ellos? ¿Alguna debería estar prohibida?" (que deduzca la inmutabilidad, no que la confirme).
+- "Cuando exiges que el email sea único, ¿cómo decides si dos correos son 'el mismo'? ¿Bastan idénticos carácter por carácter?" (abierta — deja que emerja el tema de mayúsculas/espacios; no nombres tú la solución).
+- "¿Qué acciones sobre usuarios/roles deberían quedar registradas para poder auditar quién hizo qué?"
 
-- "Cuando se elimina un usuario, ¿qué debería pasar con las relaciones que tenía (por ejemplo, las que lo vinculan a sus roles)?" (abierta — no ofrezcas tú "quedan huérfanas / se limpian"; deja que lo razone).
-- "El brief dice que hay 3 roles predefinidos y no se crean nuevos. Pensando en esos roles, ¿qué operaciones deberían permitirse sobre ellos — editarlos, borrarlos, algo más? ¿Alguna debería estar prohibida?" (abierta — que el participante deduzca la inmutabilidad, no que la confirme).
-- "Antes de decidir si un email ya existe en el sistema, ¿lo comparas tal cual lo escribió el usuario, o hay que **normalizarlo** de alguna forma primero?"
+### MON · 📈 Monitoreo
+- "¿Qué del módulo querrías poder observar en producción (intentos de login fallidos, cambios de rol, errores)? ¿Algo que debería disparar una alerta?"
 
-## Área 3 · 👥 Usuarios / ciclo de vida
+### INT · 🔗 Integraciones
+- "¿El módulo necesita hablar con algo externo — un proveedor de identidad, envío de correo para recuperar contraseña, un SSO? ¿Qué pasa si ese externo no responde?"
 
-- "¿Qué debería pasar si alguien intenta **desactivar** al último administrador activo del sistema?"
-- "'Desactivar' un usuario y 'eliminar' un usuario, ¿son lo mismo, o comportamientos distintos con reglas distintas?"
-- "¿Hay algún invariante que **nunca** se pueda romper por más que se hagan operaciones válidas — por ejemplo, quedarse sin cierto tipo de usuario, o que alguien quede sin ningún rol?"
-- "Quitarle un rol a un usuario, ¿tiene los mismos límites que eliminarlo, o unos propios?"
+### MNT · 🔧 Mantenimiento
+- "Con el tiempo: ¿hay datos que haya que limpiar o migrar (usuarios inactivos viejos, cambios en la estructura de roles)? ¿Cómo se versiona eso?"
 
-## Área 4 · 🧪 Testing (cierre)
+### RPT · 📊 Reportes
+- "El brief menciona un recurso 'reports'. ¿Qué reportes del módulo tendrían sentido y **quién** puede verlos según su rol?"
 
-- "Para cada regla que descubriste en las áreas anteriores, ¿tienes un escenario que la **viole a propósito**, no solo el camino feliz? Un test que solo prueba el caso bueno no valida la regla."
-- Repasa con el participante: ¿cada criterio nuevo quedó con su escenario negativo?
+### BCK · 💾 Backup
+- "Si se corrompe o se pierde la base de usuarios, ¿qué necesitas para recuperarla? ¿Hay datos que no se pueden perder bajo ninguna circunstancia?"
 
-## Por cada hueco descubierto
+### TST · 🧪 Testing (cierre)
+- "Por cada regla que descubriste en las áreas anteriores, ¿tienes un escenario que la **viole a propósito**, no solo el camino feliz? Un test que solo prueba el caso bueno no valida la regla."
+- Repasa: ¿cada gap crítico tiene su escenario negativo?
 
-Cuando el participante articule una regla nueva, agrégala al YAML de la historia correspondiente (`validaciones_reglas`, `manejo_errores` o `casos_edge` según el caso) y confírmasela. Registra el avance en `sessions/<slug>/SHARED-MEMORY.md` (`completitud_phase`, con el área en curso y las reglas añadidas — por descripción, no por ningún código), y anótalo también en `sessions/<slug>/discovery-log.md` (esta bitácora es lo que el facilitador revisa para ver qué descubrió cada alumno).
+## Registro
+
+Por cada gap: agrégalo al YAML de la historia (o crea `US-XXX-<AREA>.md`), clasifícalo 🔥/⚡/💡, confírmaselo al participante, y anótalo en `sessions/<slug>/discovery-log.md` (por descripción, nunca con códigos "RN-XX"). Actualiza `completitud_phase` en `sessions/<slug>/SHARED-MEMORY.md` con el área en curso y la cobertura por área.
 
 ## Guard de fin de fase
 
-No pases a Gherkin hasta haber recorrido las 4 áreas y que el participante confirme que no ve más huecos evidentes. Marca `completitud_phase.ready_for_handoff: true`.
+No pases a Gherkin hasta haber recorrido las 10 áreas y que el participante confirme que no ve más huecos evidentes. Marca `completitud_phase.ready_for_handoff: true`.
 
 ## Prohibido (confidencialidad)
 
 - No enuncies las reglas tú: pregunta.
-- No uses códigos tipo "RN-XX" ni menciones un número total de reglas ("faltan N", "vas 9 de 15"). No sabes cuántas hay; solo exploras a fondo cada área.
-- No presentes una lista de reglas para que el participante marque — eso es regalar la respuesta. Sondea con preguntas abiertas.
+- No uses códigos "RN-XX" ni menciones un número total de reglas ("faltan N", "vas X de Y"). No sabes cuántas hay; solo recorres las 10 áreas a fondo.
+- No presentes una lista de reglas para marcar — eso es regalar la respuesta. Sondea con preguntas abiertas.

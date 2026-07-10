@@ -11,14 +11,14 @@ Feature: Prestamo de libros en una biblioteca
   Background:
     Given la biblioteca tiene el libro "Cien Anios de Soledad" con 2 copias disponibles
 
-  @story_id:EJ-001 @priority:1 @complexity:low @smoke
+  @story_id:EJ-001 @origin:discovery_inicial @priority:1 @complexity:low @smoke
   Scenario: Prestar un libro disponible
     Given el socio "Ana" no tiene prestamos activos
     When el bibliotecario presta "Cien Anios de Soledad" a "Ana"
     Then el prestamo queda registrado
     And quedan 1 copias disponibles del libro
 
-  @story_id:EJ-001 @priority:1 @complexity:low @error_handling
+  @story_id:EJ-001 @origin:discovery_inicial @priority:1 @complexity:low @error_handling
   Scenario: Intentar prestar un libro sin copias disponibles
     Given el libro "Cien Anios de Soledad" no tiene copias disponibles
     When el bibliotecario intenta prestar "Cien Anios de Soledad" a "Ana"
@@ -34,3 +34,11 @@ Feature: Prestamo de libros en una biblioteca
       | socio  | prestamos_activos | resultado                                   |
       | Carlos | 2                  | permite el prestamo                         |
       | Laura  | 5                  | muestra error "Limite de prestamos alcanzado" |
+
+  # Escenario de una historia de gap surgida en la fase de Completitud (área Auditoría):
+  # nótese @origin:analisis_completitud (vs discovery_inicial de arriba).
+  @story_id:EJ-001-AUD @origin:analisis_completitud @area:auditoria @priority:2 @complexity:medium
+  Scenario: Registrar en bitácora cada préstamo para auditoría
+    Given el bibliotecario presta un libro a un socio
+    When la operación se completa
+    Then queda registrado quién prestó qué libro y cuándo

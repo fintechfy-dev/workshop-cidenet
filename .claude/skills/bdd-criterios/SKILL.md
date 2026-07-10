@@ -1,6 +1,6 @@
 ---
 name: bdd-criterios
-description: "Fase 2 del discovery BDD 2.0 Lite: entrevista al participante para escribir criterios de aceptación SMART en YAML por cada historia. Invocada por bdd-discovery cuando current_phase = criterios. Una pregunta a la vez. NO genera Gherkin todavía."
+description: "Fase 3 (Criterios) del discovery BDD 2.0: entrevista al participante para escribir criterios de aceptación SMART en YAML por cada historia. Invocada por bdd-discovery cuando current_phase = criterios. Una pregunta a la vez. NO genera Gherkin todavía."
 ---
 
 # Fase ⚡ Criterios — Entrevista
