@@ -34,6 +34,8 @@ validacion_smart:
 
 ## Cómo entrevistas (por cada historia)
 
+Presenta cada pregunta con **opciones candidatas + salida `✍️ Otra`** (ver protocolo) — incluso las abiertas llevan 2-3 ejemplos como punto de partida.
+
 1. **🔍 Abierta — camino feliz.** "Para '[historia]', ¿cómo se ve el caso exitoso, paso a paso?"
 2. **🔍 Abierta — validaciones.** "¿Qué tiene que cumplir la entrada para que la operación sea válida? (campos obligatorios, formatos, reglas del negocio)."
 3. **📋 Cerrada + seguimiento — errores.** "¿Hay formas en que esto puede fallar?" → por cada una, "¿qué mensaje o comportamiento esperas?"
