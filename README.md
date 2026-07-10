@@ -10,7 +10,7 @@ Un módulo de administración de usuarios con roles y permisos (backend .NET 9 +
 
 | Sesión | Cuándo | Qué hacen |
 |---|---|---|
-| Setup | Antes del viernes | Fork + clone + pre-pull de la imagen del devcontainer |
+| Setup | Antes del viernes | Instalar prerequisitos + clone + primer `docker compose up` local |
 | Sesión 1 | Viernes 5-7pm | Teoría + setup en vivo + arranque de `/discovery` |
 | Sesión 2 | Sábado 8am-12pm | Reglas de negocio, endpoints, frontend, Docker, PR y auditoría |
 
@@ -19,30 +19,28 @@ Trabajo individual — cada participante ejecuta el flujo completo en su propio 
 ## Prerrequisitos (antes del viernes)
 
 - [ ] VS Code con la extensión de Claude Code, y suscripción activa.
-- [ ] Docker Desktop instalado y corriendo.
+- [ ] **Docker Desktop** instalado y corriendo (corre la app con `docker compose`).
+- [ ] **.NET 9 SDK** y **Node.js 22** instalados localmente (para el loop de TDD: `dotnet test`, `npm test`).
 - [ ] **GitHub CLI (`gh`)** instalado ([cli.github.com](https://cli.github.com)) y cuenta de GitHub, sin bloqueo de VPN. Autenticas `gh` durante el setup — eso le permite a **Claude pilotar git y GitHub por ti** (fork, commits, PRs), que es como se trabaja en este taller.
-- [ ] **Pre-pull de la imagen del devcontainer la noche del viernes** (pesa ~1.7GB):
-  ```
-  docker pull ghcr.io/fintechfy-dev/workshop-cidenet-devcontainer:latest
-  ```
+
+> Todo corre **local**: la app en `docker compose` (Docker baja Postgres y construye api/frontend), y el loop de desarrollo con tu SDK/Node local. No hay que descargar ninguna imagen de entorno aparte.
 
 ## Quickstart
 
 1. **Clona la versión pública** del repo (es público, no necesitas autenticarte para esto):
    - **VS Code:** `Ctrl/Cmd+Shift+P` → **"Git: Clone"** → pega `https://github.com/fintechfy-dev/workshop-cidenet` → elige carpeta.
    - O con terminal: `git clone https://github.com/fintechfy-dev/workshop-cidenet.git`
-2. Abre la carpeta en VS Code y elige **"Reopen in Container"** (usa la imagen pre-publicada, no la reconstruye).
-3. Dentro del devcontainer, levanta el stack completo:
+2. Abre la carpeta en VS Code. Levanta el stack completo (local):
    ```
    docker compose up --build
    ```
-   Esto levanta tres servicios: `db` (Postgres vacío), `api` (que al arrancar corre las migraciones y **carga el seed de 5 usuarios de prueba**; `http://localhost:5000/health` debe responder `{"status":"ok"}`) y `frontend` (`http://localhost:5173`).
-4. **Conéctate a GitHub** desde dentro del contenedor (donde corre Claude), una vez:
+   La primera vez, Docker baja Postgres y construye las imágenes de api/frontend (tarda un poco; es una sola vez). Levanta tres servicios: `db` (Postgres vacío), `api` (que al arrancar corre las migraciones y **carga el seed de 5 usuarios de prueba**; `http://localhost:5000/health` debe responder `{"status":"ok"}`) y `frontend` (`http://localhost:5173`).
+3. **Conéctate a GitHub** una vez:
    ```
    gh auth login
    ```
    (GitHub.com → HTTPS → login con el navegador). Luego pídele a Claude: *"Haz un fork de este repo a mi cuenta y déjalo como mi origin."* — así Claude puede commitear y abrir tus PRs por ti. (Fallback sin `gh`: haz el fork por la web y agrega tu remoto a mano; Claude no podrá pilotar git.)
-5. Abre Claude Code, **carga el documento del caso** que te dieron, y ejecuta tu primer comando:
+4. Abre Claude Code, **carga el documento del caso** que te dieron, y ejecuta tu primer comando:
    ```
    /discovery
    ```
@@ -73,7 +71,6 @@ fork → clone → feature/<tu-nombre> → 1 commit por iteración (tests en ver
 ## Estructura del repo
 
 ```
-.devcontainer/     — imagen de desarrollo (ya publicada en GHCR)
 .claude/           — skills (BDD 2.0, 5 etapas), agentes, comandos, hook de pre-commit
 src/               — Domain, Application, Infrastructure, Api (DDD light)
 tests/             — xUnit
