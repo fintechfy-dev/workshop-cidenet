@@ -28,7 +28,6 @@ if (app.Environment.IsDevelopment())
     app.MapOpenApi();
 }
 
-app.UseHttpsRedirection();
 app.UseCors(FrontendCorsPolicy);
 
 app.MapGet("/health", () => Results.Ok(new { status = "ok" }))
