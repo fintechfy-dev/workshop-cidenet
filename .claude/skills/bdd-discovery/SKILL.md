@@ -20,6 +20,7 @@ Al invocar `/discovery` (o `/spec`) sin argumentos, primero mira si ya existe un
 - **Si no hay ninguna sesión aún** → es la primera corrida:
   1. Preséntate brevemente y haz la **primera pregunta**: el nombre del alumno ("¿Cómo te llamas? Con eso creo la carpeta donde queda documentada tu sesión"). Prosa simple (todavía no hay fase, así que no uses el "formato universal"); a partir de Épicas sí aplica el formato completo.
   2. **Pide el caso de negocio:** "Comparte el caso que vas a trabajar — carga el documento que te dio tu facilitador (arrástralo/pégalo) o descríbelo en unas frases." Espera a tenerlo. Ese caso es tu único insumo de dominio.
+     - **Gate duro:** sin caso NO avanzas. Si el alumno no lo tiene a la mano, tiene prisa o quiere saltárselo, **no crees la sesión, no escribas un `caso.md` vacío y no entres a Épicas** — nunca inventes un dominio para "no bloquear". Insiste bajando la barrera al mínimo ("no necesitas el documento formal: cuéntame en 2-3 frases qué se hace y quién lo usa"), escalando como en `reference/interview-protocol.md` (Insistencia progresiva) si sigue sin darlo.
   3. Genera un `slug` en kebab-case desde el nombre (ej. "Juan Pérez" → `juan-perez`).
   4. Crea `sessions/<slug>/` con estos archivos:
 
