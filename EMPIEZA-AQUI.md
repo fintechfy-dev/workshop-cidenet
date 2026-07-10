@@ -1,84 +1,81 @@
 # 🚀 Empieza aquí — Workshop AI-First
 
-Vas a construir un módulo de software **real** sin escribir el código a mano: dirigiendo a Claude paso a paso. Este taller es **AI-first** — Claude maneja git y GitHub por ti (fork, commits, PRs); tú piensas y decides.
+Vas a construir un módulo de software **real** sin escribir el código a mano: dirigiendo a Claude paso a paso. Es **AI-first** — tú piensas y decides, Claude ejecuta.
 
-## ✅ Antes de empezar (una sola vez)
+> El repo **no incluye ningún caso de negocio**. Tu facilitador te lo entrega como un documento aparte, que cargas en el chat al iniciar el discovery.
 
-- VS Code con la extensión **Claude Code** (y tu suscripción activa)
-- **Docker Desktop** abierto y corriendo
-- **.NET 9 SDK** y **Node.js 22** instalados (para correr los tests del TDD)
-- **GitHub CLI (`gh`)** instalado → [cli.github.com](https://cli.github.com)
-- Una cuenta de **GitHub**
+## 📅 Cómo se divide
 
-> Todo corre **local**: la app en `docker compose`, y el desarrollo con tu SDK/Node. No hay que bajar ninguna imagen de entorno aparte.
+- **Día 1 — Discovery:** conviertes el caso en tu especificación, entrevistado por Claude. **Setup mínimo, cero infra.**
+- **Día 2 — Construcción (TDD + GitFlow):** levantas la infraestructura y construyes el módulo por iteraciones.
 
-## 1 · Trae el repo (es público, no necesitas permisos)
+---
+
+# DÍA 1 — Discovery 🎤
+
+## ✅ Solo esto para hoy
+
+- VS Code con la extensión **Claude Code** (y tu suscripción activa).
+- El repo en tu máquina (Paso 1).
+
+> Docker, .NET SDK, Node y `gh` los necesitas **mañana**, no hoy. Hoy solo descubrimos.
+
+## 1 · Trae el repo (es público)
 
 Clona la versión pública del repo:
 
 - **VS Code:** `Ctrl/Cmd + Shift + P` → **"Git: Clone"** → pega `https://github.com/fintechfy-dev/workshop-cidenet` → elige una carpeta.
-- ¿Prefieres terminal? `git clone https://github.com/fintechfy-dev/workshop-cidenet.git`
+- O con terminal: `git clone https://github.com/fintechfy-dev/workshop-cidenet.git`
 
-## 2 · Levanta la app (local, con Docker)
+## 2 · Arranca tu discovery
 
-1. Abre la carpeta en VS Code.
-2. Levanta el stack completo:
-   ```bash
-   docker compose up --build
-   ```
-   > La primera vez, Docker baja Postgres y construye las imágenes de api/frontend. Tarda un poco, pero es una sola vez — y no descargas ninguna imagen de entorno aparte.
-3. Confirma que respira:
-   - **API** → http://localhost:5000/health debe responder `{"status":"ok"}`
-   - **App** → http://localhost:5173
+Claude te va a **entrevistar**, una pregunta a la vez, para convertir tu caso en una especificación técnica. Te dará opciones para responder — y siempre puedes escribir la tuya.
 
-## 3 · Conéctate a GitHub (para que Claude pilotee por ti)
-
-Autentica `gh` con GitHub **una vez** (en la terminal de VS Code):
-
-```bash
-gh auth login
-```
-
-Elige **GitHub.com → HTTPS → login con el navegador** y pega el código que te muestra.
-
-Ahora pídele a Claude que prepare tu copia:
-
-> «Haz un fork de este repo a mi cuenta de GitHub y déjalo como mi `origin`, para poder commitear y abrir mi PR.»
-
-Claude hace el fork y conecta tu copia. De aquí en adelante, cuando avances, **Claude commitea y abre tus PRs por ti**.
-
-## 4 · Arranca tu discovery 🎤
-
-Aquí empieza lo bueno. Claude te va a **entrevistar**, una pregunta a la vez, para convertir el caso de negocio en una especificación técnica. Te dará opciones para responder — y siempre puedes escribir la tuya si ninguna encaja.
-
-1. En Claude Code, **carga el documento del caso** que te entregamos (arrástralo o pégalo).
-2. Justo después, escribe:
+1. Abre Claude Code en la carpeta del repo.
+2. **Carga en el chat el documento del caso** que te entregamos (arrástralo o pégalo).
+3. Escribe:
    ```
    /discovery
    ```
-3. Claude te pedirá tu nombre (para guardar tu sesión) y arrancará la entrevista. **Responde con lo que sepas** — no necesitas tenerlo todo claro; para eso es la conversación. Si algo no lo sabes, dilo y sigue.
+4. Claude te pedirá tu nombre y tu caso, y arrancará la entrevista. **Responde con lo que sepas** — no necesitas tenerlo todo claro; para eso es la conversación.
 
-> 💡 ¿Necesitas parar? Retomas con `/discovery resume`. Tu avance queda guardado en `sessions/tu-nombre/`.
+> 💡 **Hoy no necesitas commitear.** Tu discovery queda guardado en archivos (`sessions/tu-nombre/`). Si paras a mitad, retomas con `/discovery resume`. Mañana configuras git y empiezas a versionar.
 
-Al terminar, tu discovery deja tu **spec ejecutable** en `features/*.feature` (Gherkin). Ese es el artefacto que vas a convertir en código en el Paso 5.
+Al cerrar el Día 1 tendrás tu **spec ejecutable** (`features/*.feature`) lista para construir mañana.
 
-## 5 · Construye por iteraciones — 🧪 TDD puro + 🌳 GitFlow puro
+---
 
-Ahora construyes el módulo en **iteraciones incrementales pequeñas**, con dos reglas de oro que no se rompen:
+# DÍA 2 — Construcción: 🧪 TDD puro + 🌳 GitFlow puro
 
-- **🧪 TDD puro:** el test va **siempre antes** del código. Se escribe desde tu Gherkin, se ve fallar, y luego se implementa lo mínimo para que pase.
-- **🌳 GitFlow puro:** una rama por feature, **un commit por iteración** (con sus tests en verde), un PR, review cruzado con un compañero, y merge.
+## ✅ Instálalo la noche del viernes
+
+- **Docker Desktop** (corre la app con `docker compose`).
+- **.NET 9 SDK** y **Node.js 22** (para los tests del TDD).
+- **GitHub CLI (`gh`)** → [cli.github.com](https://cli.github.com).
+
+## 3 · Prepara git e infra (tu primera iteración)
+
+1. Autentica `gh` una vez (así **Claude pilotea git y GitHub por ti** — fork, commits, PRs):
+   ```
+   gh auth login
+   ```
+   (GitHub.com → HTTPS → login con el navegador). Luego pídele a Claude: *"Haz un fork de este repo a mi cuenta y déjalo como mi origin."*
+2. **Levanta la infraestructura** — puede ser tu primera iteración del plan:
+   ```
+   docker compose up --build
+   ```
+   Baja Postgres y construye api/frontend. Verifica: **API** → http://localhost:5000/health responde `{"status":"ok"}` · **App** → http://localhost:5173. (La base arranca vacía; tú creas tu esquema con migraciones cuando modeles tu dominio.)
+
+## 4 · Construye por iteraciones
+
+- **🧪 TDD puro:** el test va **siempre antes** del código, escrito desde tu Gherkin, se ve fallar, y luego implementas lo mínimo para que pase.
+- **🌳 GitFlow puro:** una rama por feature, **un commit por iteración** (con tests en verde), un PR, review cruzado, y merge.
 
 El loop, con Claude piloteando:
 
-1. `/plan` → Claude divide tu spec en iteraciones, cada una con un "listo cuando…" concreto.
-2. Por cada iteración:
-   - `/test` → Claude escribe los **tests primero**, desde tus escenarios Gherkin.
-   - `/iterate` → Claude implementa lo mínimo para que esos tests pasen, y **commitea** la iteración.
-3. Repite `/test` → `/iterate` hasta terminar el plan.
-4. `/audit` → Claude revisa que tu código cubra tu spec (funcional y técnicamente).
-
-> Como autenticaste `gh`, Claude maneja git por ti: crea tu rama, commitea cada iteración y abre tu PR para el review cruzado. Recuerda: **un commit = una iteración con sus tests pasando.**
+1. `/plan` → Claude divide tu spec en iteraciones con un "listo cuando…" concreto (la **primera puede ser la infra** del Paso 3).
+2. Por cada iteración: `/test` (tests primero) → `/iterate` (código + commit).
+3. `/audit` → revisa que tu código cubra tu spec.
 
 ## 🧭 Reglas del juego
 
