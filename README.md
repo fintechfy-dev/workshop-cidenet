@@ -1,6 +1,6 @@
 # workshop-cidenet — Taller AI-First: Módulo de Usuarios, Roles y Permisos
 
-Taller práctico de 2 sesiones donde vas a ejecutar, sobre un módulo real, el flujo completo de desarrollo asistido por IA: **discovery (BDD 2.0 Lite) → auditoría del discovery → looping engineering (TDD) → auditoría de implementación**. El producto del taller es el flujo — el módulo es solo el vehículo para practicarlo.
+Taller práctico de 2 sesiones donde vas a ejecutar, sobre un módulo real, el flujo completo de desarrollo asistido por IA: **discovery (BDD 2.0, 5 etapas) → auditoría del discovery → looping engineering (TDD) → auditoría de implementación**. El producto del taller es el flujo — el módulo es solo el vehículo para practicarlo.
 
 ## Qué vas a construir
 
@@ -50,14 +50,14 @@ Trabajo individual — cada participante ejecuta el flujo completo en su propio 
 ## El loop de comandos
 
 ```
-/discovery → entrevista BDD 2.0 Lite → specs/SPEC.md + specs/criterios/*.yaml + features/*.feature
+/discovery → entrevista BDD 2.0 (5 etapas) → specs/EPIC-001 + specs/historias/ + specs/criterios/*.yaml + features/*.feature + specs/SPEC.md
 /plan      → specs/PLAN.md (iteraciones con "Done-when")
 /test      → tests desde Gherkin (tests primero)
 /iterate   → implementa hasta que pasen, commitea
 /audit     → cobertura funcional y técnica: tu propio código vs tu propia spec
 ```
 
-`/discovery` (alias `/spec`) te entrevista fase por fase (Historias → Criterios SMART → Completitud enfocada → Gherkin) en vez de generar la spec de golpe; documenta tu sesión en `sessions/<tu-nombre>/` (incluido el estado) y se retoma con `/discovery resume`.
+`/discovery` (alias `/spec`) te entrevista por las 5 etapas de BDD 2.0 (Épicas VUIFED → Historias INVEST → Criterios SMART → Completitud 10 áreas → Gherkin) en vez de generar la spec de golpe; documenta tu sesión en `sessions/<tu-nombre>/` (incluido el estado) y se retoma con `/discovery resume`.
 
 Cada commit pasa por un hook de pre-commit (`dotnet format` + `dotnet test`, y `npm test` si tocaste frontend) — si algo falla, el commit se bloquea hasta corregirlo.
 
@@ -71,7 +71,7 @@ fork → clone → feature/<tu-nombre> → commits por iteración → PR contra 
 
 ```
 .devcontainer/     — imagen de desarrollo (ya publicada en GHCR)
-.claude/           — skills (BDD 2.0 Lite), agentes, comandos, hook de pre-commit
+.claude/           — skills (BDD 2.0, 5 etapas), agentes, comandos, hook de pre-commit
 src/               — Domain, Application, Infrastructure, Api (DDD light)
 tests/             — xUnit
 frontend/          — Vite + React + TS

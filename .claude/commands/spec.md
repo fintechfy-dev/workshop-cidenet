@@ -1,5 +1,5 @@
 ---
-description: "Alias de /discovery. Arranca o reanuda la entrevista de discovery BDD 2.0 Lite del taller."
+description: "Alias de /discovery. Arranca o reanuda la entrevista de discovery BDD 2.0 del taller."
 argument-hint: "[resume — opcional]"
 ---
 

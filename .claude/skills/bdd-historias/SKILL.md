@@ -1,6 +1,6 @@
 ---
 name: bdd-historias
-description: "Fase 1 del discovery BDD 2.0 Lite: entrevista al participante para derivar historias de usuario INVEST del módulo, a partir de specs/BRIEF.md. Invocada por el orquestador bdd-discovery cuando current_phase = historias. Una pregunta a la vez."
+description: "Fase 2 (Historias) del discovery BDD 2.0: entrevista al participante para derivar historias de usuario INVEST del módulo, a partir de specs/BRIEF.md. Invocada por el orquestador bdd-discovery cuando current_phase = historias. Una pregunta a la vez."
 ---
 
 # Fase 📝 Historias — Entrevista
