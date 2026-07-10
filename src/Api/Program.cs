@@ -33,13 +33,14 @@ app.UseCors(FrontendCorsPolicy);
 app.MapGet("/health", () => Results.Ok(new { status = "ok" }))
     .WithName("HealthCheck");
 
-if (!app.Environment.IsEnvironment("Testing"))
-{
-    using var scope = app.Services.CreateScope();
-    var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-    await db.Database.MigrateAsync();
-    await DbSeeder.SeedAsync(db);
-}
+// El AppDbContext queda registrado y listo. Cuando definas tu dominio y tu
+// primera migración, aplícala al arrancar (ej.):
+//   if (!app.Environment.IsEnvironment("Testing"))
+//   {
+//       using var scope = app.Services.CreateScope();
+//       await scope.ServiceProvider.GetRequiredService<AppDbContext>()
+//           .Database.MigrateAsync();
+//   }
 
 app.Run();
 

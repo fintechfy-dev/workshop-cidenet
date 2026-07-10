@@ -13,10 +13,8 @@ describe("App", () => {
     );
   });
 
-  it("renders the module title", () => {
+  it("renders the app shell", () => {
     render(<App />);
-    expect(
-      screen.getByText(/Módulo de Usuarios, Roles y Permisos/i),
-    ).toBeInTheDocument();
+    expect(screen.getByText(/Workshop AI-First/i)).toBeInTheDocument();
   });
 });

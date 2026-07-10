@@ -1,10 +1,5 @@
 import { useEffect, useState } from "react";
-import { BrowserRouter, Link, Route, Routes } from "react-router-dom";
 import { checkHealth } from "./api/client";
-import { UsersTable } from "./pages/UsersTable";
-import { UserForm } from "./pages/UserForm";
-import { PermissionsMatrix } from "./pages/PermissionsMatrix";
-import { DeleteConfirmModal } from "./pages/DeleteConfirmModal";
 import "./App.css";
 
 function HealthBadge() {
@@ -21,23 +16,17 @@ function HealthBadge() {
 
 export default function App() {
   return (
-    <BrowserRouter>
+    <>
       <header>
-        <h1>Módulo de Usuarios, Roles y Permisos</h1>
+        <h1>Workshop AI-First</h1>
         <HealthBadge />
-        <nav>
-          <Link to="/">Usuarios</Link> | <Link to="/nuevo">Nuevo Usuario</Link> |{" "}
-          <Link to="/permisos">Permisos</Link>
-        </nav>
       </header>
       <main>
-        <Routes>
-          <Route path="/" element={<UsersTable />} />
-          <Route path="/nuevo" element={<UserForm />} />
-          <Route path="/permisos" element={<PermissionsMatrix />} />
-          <Route path="/eliminar" element={<DeleteConfirmModal />} />
-        </Routes>
+        <p>
+          Tu app va aquí. La construyes durante el taller, a partir de la spec
+          que salga de tu discovery.
+        </p>
       </main>
-    </BrowserRouter>
+    </>
   );
 }

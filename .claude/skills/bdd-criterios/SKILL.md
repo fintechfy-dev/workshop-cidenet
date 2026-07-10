@@ -53,4 +53,4 @@ No pases a Completitud hasta que cada historia tenga su YAML con `validacion_sma
 
 ## Regla de confidencialidad
 
-Pregunta, no dictes. Si el participante no menciona una validación importante (ej. fuerza de contraseña, unicidad de email), **no se la des como criterio** — eso se sondea en la fase de Completitud con preguntas, para que la descubra él.
+Pregunta, no dictes. Si el participante no menciona una validación importante (una regla de negocio, un límite, un caso de error), **no se la des como criterio** — eso se sondea en la fase de Completitud con preguntas, para que la descubra él.

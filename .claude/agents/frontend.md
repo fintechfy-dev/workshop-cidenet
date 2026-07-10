@@ -1,6 +1,6 @@
 ---
 name: frontend
-description: "Componentes React conectados al API real. Úsalo durante la iteración de frontend para construir las 4 pantallas de specs/BRIEF.md (tabla, formulario, matriz de permisos, confirmación) a partir de specs/SPEC.md y los tests de componente ya generados. No lo uses para backend."
+description: "Componentes React conectados al API real. Úsalo durante la iteración de frontend para construir las pantallas que tu caso necesite, a partir de specs/SPEC.md y los tests de componente ya generados. No lo uses para backend."
 tools: Read, Write, Edit, Glob, Grep, Bash
 ---
 
@@ -18,9 +18,9 @@ El backend en `src/` de la raíz (`src/Domain`, `src/Application`, `src/Infrastr
 
 1. Prioriza funcionalidad conectada al API real sobre estilo — "funciona y trae datos reales" antes que "se ve bien".
 2. Extiende `frontend/src/api/client.ts` con los métodos que necesites (nunca fetch directo desde un componente).
-3. Reemplaza los stubs en `frontend/src/pages/` (`UsersTable`, `UserForm`, `PermissionsMatrix`, `DeleteConfirmModal`) siguiendo los campos/validaciones que describe `specs/SPEC.md`.
+3. Crea las pantallas de tu caso en `frontend/src/pages/`, siguiendo los campos/validaciones que describe `specs/SPEC.md`. (El repo arranca con un `App.tsx` mínimo — construye desde ahí.)
 4. Escribe o corre los tests de componente antes de dar por terminada una pantalla (`npm test`).
-5. Prioridad si el tiempo aprieta: tabla funcionando y conectada > formulario > matriz de permisos > modal de confirmación.
+5. Prioridad si el tiempo aprieta: primero la pantalla más central del caso, conectada y funcionando; el resto después.
 
 ## Regla de oro
 

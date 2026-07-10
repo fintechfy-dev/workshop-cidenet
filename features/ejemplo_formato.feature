@@ -1,6 +1,6 @@
-# Ejemplo de formato Gherkin — dominio de biblioteca, NO relacionado al módulo real del taller.
-# Esto es solo una referencia de formato para /discovery: tags, Background, Scenario,
-# Scenario Outline. Los .feature reales del módulo de usuarios se generan durante el taller.
+# Ejemplo de formato Gherkin — dominio de biblioteca, solo como referencia de formato
+# (tags, Background, Scenario, Scenario Outline). NO es el caso del taller: tu caso lo
+# aportas tú, y sus .feature reales los genera /discovery. Borra este archivo cuando tengas los tuyos.
 
 @epic_id:EJEMPLO-000
 Feature: Prestamo de libros en una biblioteca

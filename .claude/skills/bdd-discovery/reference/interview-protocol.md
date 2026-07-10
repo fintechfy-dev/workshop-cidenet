@@ -18,8 +18,8 @@ Nunca dispares varias preguntas juntas ni generes el documento completo de una p
 
 **Regla base: toda pregunta ofrece opciones candidatas + una salida abierta** (como una buena encuesta). El participante nunca se queda en blanco frente a una pregunta vacía, pero tampoco se siente encajonado: siempre puede responder con lo suyo.
 
-- 📊 **Opción (el default)** — 3-5 opciones etiquetadas A/B/C/D que tú generas a partir del brief y el dominio, **+ siempre** una línea `✍️ Otra: si ninguna encaja, descríbela con tus palabras.`
-- 🔍 **Abierta** — solo cuando la respuesta es genuinamente narrativa (ej. "describe el flujo de crear un usuario"). Aun así, da 2-3 ejemplos como punto de partida (`💡 por ejemplo: …`) y deja la respuesta libre. Añade `❓ ¿Esta pregunta está clara? 🤔`.
+- 📊 **Opción (el default)** — 3-5 opciones etiquetadas A/B/C/D que tú generas a partir del caso del alumno, **+ siempre** una línea `✍️ Otra: si ninguna encaja, descríbela con tus palabras.`
+- 🔍 **Abierta** — solo cuando la respuesta es genuinamente narrativa (ej. "describe el flujo principal de tu caso, paso a paso"). Aun así, da 2-3 ejemplos como punto de partida (`💡 por ejemplo: …`) y deja la respuesta libre. Añade `❓ ¿Esta pregunta está clara? 🤔`.
 - 📋 **Cerrada** — sí/no que abre a un seguimiento. Ofrece las dos opciones + `✍️ Otra` por si la respuesta es "depende".
 - 🏆 **Ranking** — priorizar una lista (pide un número por ítem).
 
@@ -47,7 +47,7 @@ C) [opción candidata plausible]
 ⏳ Esperando tu respuesta...
 ```
 
-- Las opciones salen del brief y del dominio; que sean plausibles y distintas. La línea `✍️ Otra` va SIEMPRE.
+- Las opciones salen del caso del alumno; que sean plausibles y distintas. La línea `✍️ Otra` va SIEMPRE.
 - **Paralelismo (clave para no filtrar):** las opciones deben tener **largo y nivel de detalle parejos**, y **ninguna debe venir "justificada"**. Que una opción sea más larga o traiga su razón mientras las otras son escuetas es lo que telegrafía cuál es "la correcta" — más que cualquier relleno absurdo.
 - Para una pregunta genuinamente abierta, reemplaza las opciones por `💡 por ejemplo: [2-3 ejemplos]` y deja la respuesta libre.
 - El `[X] DE [Y]` es orientativo. **Cuando no conoces (ni debes insinuar) el total** —como en Completitud, donde el número de huecos es desconocido— usa solo `PREGUNTA [X]` sin el denominador.
@@ -95,7 +95,7 @@ Todo el estado vive en el `SHARED-MEMORY.md` de la sesión del alumno (`sessions
 
 ## Regla de oro de confidencialidad
 
-Este es un taller donde el participante debe **descubrir** las reglas de negocio ocultas. Nunca le des la respuesta: pregunta de forma que la piense. Ejemplo — en vez de "recuerda que no se puede desactivar al último admin", pregunta "¿qué debería pasar si alguien intenta desactivar al último admin activo del sistema?". La diferencia entre enseñar y regalar la respuesta es exactamente el punto del ejercicio.
+Este es un taller donde el participante debe **descubrir** las reglas de negocio que su caso no dice explícitamente. Nunca le des la respuesta: pregunta de forma que la piense. Ejemplo del patrón — en vez de "recuerda que no se puede pasar de tal límite", pregunta "¿qué debería pasar si alguien intenta pasar de ese límite?". La diferencia entre enseñar y regalar la respuesta es exactamente el punto del ejercicio. (El repo no conoce el caso; las "reglas ocultas" son las que el facilitador tiene en su material, no en este repo.)
 
 **Opciones sin regalar la respuesta.** Ofrecer opciones (📊) NO es regalar la respuesta si el participante sigue teniendo que elegir y razonar. Pero cuando la pregunta toca una regla que él debe descubrir:
 - Que las opciones sean **alternativas plausibles y balanceadas** (varias suenan razonables), no una obviamente correcta rodeada de rellenos absurdos.
