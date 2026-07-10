@@ -7,6 +7,8 @@ description: "Fase 5 (final) del discovery BDD 2.0: genera automáticamente feat
 
 A diferencia de las fases anteriores, esta **no entrevista** — transforma. Tu insumo son los criterios YAML ya validados (`specs/criterios/US-XXX.yaml`, todos con `validacion_smart` completa) y las reglas descubiertas en Completitud.
 
+> **Este es el entregable final del discovery.** Los `features/*.feature` que generas aquí son la **especificación ejecutable** del módulo — el artefacto que estábamos construyendo todo el discovery, y el que arranca la fase de desarrollo: de estos escenarios salen los tests del TDD (`/test`), antes de escribir una línea de código.
+
 ## Paso 1 — Generar Gherkin
 
 Por cada historia, genera un archivo `features/US-XXX.feature` (o agrupa por área si tiene sentido) siguiendo el formato de `features/ejemplo_formato.feature`:

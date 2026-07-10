@@ -34,8 +34,9 @@ Repite `/test` → `/iterate` por cada iteración del plan. El commit de cada it
 ## Convenciones
 
 - Reglas de negocio, criterios y specs en español; código, nombres de clases/variables en inglés.
-- Los criterios de aceptación (Fase 3-equivalente) van primero en YAML — no escribas Gherkin directo desde el brief, pasa por `/discovery`.
-- Un commit por iteración, no acumules varias iteraciones en un solo commit — el hook y el review cruzado del sábado esperan ese grano.
+- Los criterios de aceptación se escriben primero en YAML (etapa Criterios) y el **Gherkin se genera después, en la etapa 5 del discovery**, a partir de esos criterios. Es secuencia, no exclusión: el `.feature` **sí** es el entregable final del discovery — la spec ejecutable que alimenta el TDD. No lo escribas a mano desde el brief; pasa por `/discovery`.
+- **TDD puro:** en cada iteración el test se escribe (desde el Gherkin) y se ve fallar **antes** de implementar. Nunca código primero.
+- **GitFlow puro:** una rama por feature, **un commit por iteración** con sus tests en verde, PR + review cruzado antes de mergear. No acumules varias iteraciones en un solo commit — el hook y el review del sábado esperan ese grano.
 
 ## Qué no hacer
 

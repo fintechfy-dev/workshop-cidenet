@@ -58,15 +58,17 @@ Trabajo individual — cada participante ejecuta el flujo completo en su propio 
 /audit     → cobertura funcional y técnica: tu propio código vs tu propia spec
 ```
 
-`/discovery` (alias `/spec`) te entrevista por las 5 etapas de BDD 2.0 (Épicas VUIFED → Historias INVEST → Criterios SMART → Completitud 10 áreas → Gherkin) en vez de generar la spec de golpe; documenta tu sesión en `sessions/<tu-nombre>/` (incluido el estado) y se retoma con `/discovery resume`.
+`/discovery` (alias `/spec`) te entrevista por las 5 etapas de BDD 2.0 (Épicas VUIFED → Historias INVEST → Criterios SMART → Completitud 10 áreas → Gherkin) en vez de generar la spec de golpe; documenta tu sesión en `sessions/<tu-nombre>/` (incluido el estado) y se retoma con `/discovery resume`. **Su entregable final son los `features/*.feature` (Gherkin): tu spec ejecutable, y el punto de partida del desarrollo.**
 
-Cada commit pasa por un hook de pre-commit (`dotnet format` + `dotnet test`, y `npm test` si tocaste frontend) — si algo falla, el commit se bloquea hasta corregirlo.
+Terminado el discovery, el desarrollo es **iterativo, con TDD puro y GitFlow puro**: `/plan` divide la spec en iteraciones pequeñas; por cada una, `/test` escribe los tests **primero** (desde tu Gherkin) y `/iterate` implementa lo mínimo para que pasen y commitea. `/audit` cierra validando cobertura. Cada commit pasa por un hook de pre-commit (`dotnet format` + `dotnet test`, y `npm test` si tocaste frontend) — si algo falla, el commit se bloquea.
 
-## Gitflow del taller
+## Gitflow del taller (puro)
 
 ```
-fork → clone → feature/<tu-nombre> → commits por iteración → PR contra main de tu fork → review cruzado → merge
+fork → clone → feature/<tu-nombre> → 1 commit por iteración (tests en verde) → PR → review cruzado → merge
 ```
+
+**Reglas duras:** el test va **antes** del código (TDD puro), y **un commit = una iteración** con sus tests pasando (GitFlow puro). Claude pilotea git por ti (por eso autenticas `gh` en el setup): crea la rama, commitea cada iteración y abre tu PR.
 
 ## Estructura del repo
 

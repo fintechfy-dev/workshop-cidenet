@@ -57,6 +57,26 @@ Aquí empieza lo bueno. Claude te va a **entrevistar**, una pregunta a la vez, p
 
 > 💡 ¿Necesitas parar? Retomas con `/discovery resume`. Tu avance queda guardado en `sessions/tu-nombre/`.
 
+Al terminar, tu discovery deja tu **spec ejecutable** en `features/*.feature` (Gherkin). Ese es el artefacto que vas a convertir en código en el Paso 5.
+
+## 5 · Construye por iteraciones — 🧪 TDD puro + 🌳 GitFlow puro
+
+Ahora construyes el módulo en **iteraciones incrementales pequeñas**, con dos reglas de oro que no se rompen:
+
+- **🧪 TDD puro:** el test va **siempre antes** del código. Se escribe desde tu Gherkin, se ve fallar, y luego se implementa lo mínimo para que pase.
+- **🌳 GitFlow puro:** una rama por feature, **un commit por iteración** (con sus tests en verde), un PR, review cruzado con un compañero, y merge.
+
+El loop, con Claude piloteando:
+
+1. `/plan` → Claude divide tu spec en iteraciones, cada una con un "listo cuando…" concreto.
+2. Por cada iteración:
+   - `/test` → Claude escribe los **tests primero**, desde tus escenarios Gherkin.
+   - `/iterate` → Claude implementa lo mínimo para que esos tests pasen, y **commitea** la iteración.
+3. Repite `/test` → `/iterate` hasta terminar el plan.
+4. `/audit` → Claude revisa que tu código cubra tu spec (funcional y técnicamente).
+
+> Como autenticaste `gh`, Claude maneja git por ti: crea tu rama, commitea cada iteración y abre tu PR para el review cruzado. Recuerda: **un commit = una iteración con sus tests pasando.**
+
 ## 🧭 Reglas del juego
 
 - **Tú decides, Claude ejecuta.** Lee lo que produce y corrígelo — nada de aceptar a ciegas.
