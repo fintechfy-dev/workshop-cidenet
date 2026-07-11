@@ -59,6 +59,11 @@ var app = builder.Build();
 if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();
+    app.UseSwaggerUI(options =>
+    {
+        options.SwaggerEndpoint("/openapi/v1.json", "Api v1");
+        options.RoutePrefix = "swagger";
+    });
 }
 
 app.UseCors(FrontendCorsPolicy);
@@ -299,14 +304,13 @@ api.MapGet("/monitoring/alerts", async (HttpRequest httpRequest, IUserRepository
 })
 .WithName("GetAlerts");
 
-// El AppDbContext queda registrado y listo. Cuando definas tu dominio y tu
-// primera migración, aplícala al arrancar (ej.):
-//   if (!app.Environment.IsEnvironment("Testing"))
-//   {
-//       using var scope = app.Services.CreateScope();
-//       await scope.ServiceProvider.GetRequiredService<AppDbContext>()
-//           .Database.MigrateAsync();
-//   }
+// Aplica la migración inicial al arrancar (fuera de Testing, donde el
+// harness ya sustituye el AppDbContext por EF InMemory).
+if (!app.Environment.IsEnvironment("Testing"))
+{
+    using var scope = app.Services.CreateScope();
+    await scope.ServiceProvider.GetRequiredService<AppDbContext>().Database.MigrateAsync();
+}
 
 app.Run();
 
