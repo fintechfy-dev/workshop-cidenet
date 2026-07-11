@@ -87,10 +87,12 @@
 
 ---
 
-## Iteración 13 — Frontend: tabla de usuarios (pantalla central)
+## Iteración 13 — Frontend: tabla de usuarios (pantalla central) ✅
 
 **Entregable:** componente de tabla conectado a `GET /api/users` (paginación, búsqueda, filtros, acciones por fila); estados de carga/vacío/error.
 **Done-when:** tests de componente (Vitest) de la tabla en verde contra el API real.
+**Estado:** ✅ Cumplida. `npm test` → 8/8 verde (7 escenarios nuevos de `UsersTable` + el smoke test previo de `App`). `UsersTablePage` (`frontend/src/pages/UsersTable.tsx`) llama a `GET /api/users` vía el cliente real (`api/client.ts`), con búsqueda debounced, filtros de rol/estado, paginación, y estados carga/vacío/error/sin-acceso (403 → Viewer). Las acciones (editar/eliminar) solo se muestran si el actor (`auth/session.ts`, provisional hasta el login de It16) es Admin. Verificado en navegador (Playwright) contra el stack real `docker compose up --build` (Postgres + API + Vite), incluyendo la vista de Editor sin columna de acciones.
+**De paso:** se cerró un gap pendiente desde la Iteración 2 — nunca existía una migración EF real, así que `docker compose up` no funcionaba contra Postgres. Se generó `InitialCreate` y se aplica al arrancar fuera de `Testing` (ver commit `fix:` previo).
 
 ## Iteración 14 — Frontend: formulario crear/editar
 

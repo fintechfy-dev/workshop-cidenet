@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { checkHealth } from "./api/client";
+import UsersTablePage from "./pages/UsersTable";
 import "./App.css";
 
 function HealthBadge() {
@@ -22,10 +23,7 @@ export default function App() {
         <HealthBadge />
       </header>
       <main>
-        <p>
-          Tu app va aquí. La construyes durante el taller, a partir de la spec
-          que salga de tu discovery.
-        </p>
+        <UsersTablePage />
       </main>
     </>
   );
