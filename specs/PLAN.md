@@ -6,20 +6,23 @@
 
 ---
 
-## Iteración 1 — Infraestructura y arranque
+## Iteración 1 — Infraestructura y arranque ✅
 
 **Entregable:** `docker compose` levantando Postgres + API (.NET) + frontend (Vite/React); `AppDbContext` conectado; endpoint `/health`.
 **Done-when:** `docker compose up --build` levanta db + api + frontend y `GET /health` responde `ok`.
+**Estado:** ✅ Ya satisfecha por la plomería base del repo (`/health` implementado, `HealthCheckTests` en verde).
 
 ## Iteración 2 — Modelo de dominio + migración inicial + seed Admin
 
 **Entregable:** entidades `User`, `Role` (Admin/Editor/Viewer predefinidos), `Permission` (matriz recurso×acción); invariantes de dominio (un rol por usuario R5, estado Activo por defecto, email normalizado); primera migración EF; **Admin sembrado** (US-001-MNT/MNT-1) con marca de "debe cambiar contraseña".
 **Done-when:** la migración crea las tablas; existe el Admin seed; tests de dominio verdes (single-role, estado default, roles predefinidos inmutables).
 
-## Iteración 3 — Crear usuario (US-001)
+## Iteración 3 — Crear usuario (US-001) ✅
 
 **Entregable:** endpoint `POST /api/users` (solo Admin); validaciones (5 campos obligatorios, formato/longitud email, nombre 2–100, política de contraseña, confirmación); email único case-insensitive + trim (R4); **hash con salt** (SEC-2); **reactivación** de cuenta soft-deleted al recrear su email (US-001-EDGE5).
 **Done-when:** los escenarios de `features/US-001.feature` pasan (incluye negativos: duplicado, contraseña débil, no coinciden, Viewer→403).
+**Estado:** ✅ Cumplida. `dotnet test` → **17/17 verde** (16 escenarios de US-001 + health). El modelo de dominio de la Iteración 2 (`User`, `Email`, `UserRole`, `UserStatus`, `PasswordPolicy`) se construyó aquí con sus invariantes.
+**Deferidos (dependen de otras iteraciones):** Viewer→403 (autorización, It 9–10), reactivación de email eliminado (soft-delete, It 6), botón Guardar deshabilitado (frontend, It 14). Sus escenarios están en `features/` y se cubrirán en esas iteraciones.
 
 ## Iteración 4 — Consultar usuarios (US-002)
 

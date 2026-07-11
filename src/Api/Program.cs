@@ -1,4 +1,7 @@
+using Api.Users;
+using Application.Users;
 using Infrastructure.Persistence;
+using Infrastructure.Security;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -19,7 +22,16 @@ var connectionString = builder.Configuration.GetConnectionString("Default")
     ?? Environment.GetEnvironmentVariable("CONNECTION_STRING")
     ?? "Host=localhost;Port=5432;Database=workshop_cidenet;Username=postgres;Password=postgres";
 
-builder.Services.AddDbContext<AppDbContext>(options => options.UseNpgsql(connectionString));
+// En pruebas, el proveedor de base de datos lo registra el harness (EF InMemory);
+// fuera de pruebas usamos Postgres.
+if (!builder.Environment.IsEnvironment("Testing"))
+{
+    builder.Services.AddDbContext<AppDbContext>(options => options.UseNpgsql(connectionString));
+}
+
+builder.Services.AddScoped<IUserRepository, UserRepository>();
+builder.Services.AddSingleton<IPasswordHasher, BcryptPasswordHasher>();
+builder.Services.AddScoped<CreateUserService>();
 
 var app = builder.Build();
 
@@ -32,6 +44,27 @@ app.UseCors(FrontendCorsPolicy);
 
 app.MapGet("/health", () => Results.Ok(new { status = "ok" }))
     .WithName("HealthCheck");
+
+app.MapPost("/api/users", async (CreateUserRequest request, CreateUserService service) =>
+{
+    var result = await service.CreateAsync(new CreateUserCommand(
+        request.Nombre,
+        request.Email,
+        request.Password,
+        request.ConfirmPassword,
+        request.Rol,
+        request.Estado));
+
+    return result.Outcome switch
+    {
+        CreateUserOutcome.Created =>
+            Results.Created($"/api/users/{result.User!.Id}", result.User),
+        CreateUserOutcome.EmailAlreadyExists =>
+            Results.Conflict(new { error = result.Error }),
+        _ => Results.BadRequest(new { error = result.Error })
+    };
+})
+.WithName("CreateUser");
 
 // El AppDbContext queda registrado y listo. Cuando definas tu dominio y tu
 // primera migración, aplícala al arrancar (ej.):
