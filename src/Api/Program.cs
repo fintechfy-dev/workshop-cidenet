@@ -34,6 +34,7 @@ builder.Services.AddSingleton<IPasswordHasher, BcryptPasswordHasher>();
 builder.Services.AddScoped<CreateUserService>();
 builder.Services.AddScoped<ListUsersService>();
 builder.Services.AddScoped<EditUserService>();
+builder.Services.AddScoped<DeleteUserService>();
 
 var app = builder.Build();
 
@@ -93,6 +94,19 @@ app.MapPut("/api/users/{id:guid}", async (Guid id, EditUserRequest request, Edit
     };
 })
 .WithName("EditUser");
+
+app.MapDelete("/api/users/{id:guid}", async (Guid id, DeleteUserService service) =>
+{
+    var result = await service.DeleteAsync(id);
+
+    return result.Outcome switch
+    {
+        DeleteUserOutcome.Deleted => Results.NoContent(),
+        DeleteUserOutcome.NotFound => Results.NotFound(),
+        _ => Results.Conflict(new { error = result.Error })
+    };
+})
+.WithName("DeleteUser");
 
 // El AppDbContext queda registrado y listo. Cuando definas tu dominio y tu
 // primera migración, aplícala al arrancar (ej.):

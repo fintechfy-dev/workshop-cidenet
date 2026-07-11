@@ -32,13 +32,25 @@ public sealed class CreateUserService
             PasswordPolicy.Ensure(command.Password);
             var role = UserRoleParser.Parse(command.Rol);
             var status = UserStatusParser.Parse(command.Estado);
+            var passwordHash = _passwordHasher.Hash(command.Password!);
 
-            if (await _users.ExistsByEmailAsync(email.Value, ct))
+            var existing = await _users.GetByEmailIncludingDeletedAsync(email.Value, ct);
+            if (existing is not null)
             {
-                return CreateUserResult.Conflict("El email ya está registrado.");
+                if (!existing.IsDeleted)
+                {
+                    return CreateUserResult.Conflict("El email ya está registrado.");
+                }
+
+                // Reactivación (US-001-EDGE5): recrear el email de una cuenta eliminada
+                // reactiva la cuenta anterior en vez de duplicarla.
+                existing.Reactivate(command.Nombre, email, role, status, passwordHash);
+                await _users.SaveChangesAsync(ct);
+
+                return CreateUserResult.Created(new UserDto(
+                    existing.Id, existing.Name, existing.Email, existing.Role.ToString(), existing.Status.ToString()));
             }
 
-            var passwordHash = _passwordHasher.Hash(command.Password!);
             var user = User.Create(command.Nombre, email, role, status, passwordHash);
 
             await _users.AddAsync(user, ct);

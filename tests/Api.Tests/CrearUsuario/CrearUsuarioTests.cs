@@ -1,6 +1,7 @@
 using System;
 using System.Net;
 using System.Net.Http.Json;
+using System.Text.Json;
 using System.Threading.Tasks;
 using Xunit;
 
@@ -15,9 +16,6 @@ namespace Api.Tests.CrearUsuario;
 /// Fuera de este archivo (deferidos por dependencia de otras iteraciones):
 ///  - Scenario "Un rol sin permiso no puede crear usuarios" (US-001-SEC): requiere
 ///    autenticación/autorización (US-007 / Iteración 10) → va en la suite de SEC.
-///  - Scenario "Recrear el email de una cuenta eliminada reactiva la cuenta"
-///    (US-001-AUD): requiere el borrado lógico (Iteración 6) para montar la
-///    precondición → va con la suite de soft-delete.
 ///  - Scenario UX "botón Guardar deshabilitado": es de frontend (Iteración 14).
 /// </summary>
 public class CrearUsuarioTests : IClassFixture<CrearUsuarioFactory>
@@ -198,5 +196,27 @@ public class CrearUsuarioTests : IClassFixture<CrearUsuarioFactory>
         {
             Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
         }
+    }
+
+    // Scenario (US-001-EDGE5): Recrear el email de una cuenta eliminada reactiva la cuenta
+    [Fact]
+    public async Task Recrear_email_de_cuenta_eliminada_reactiva_la_cuenta_en_vez_de_duplicarla()
+    {
+        var client = _factory.CreateClient();
+        var email = UniqueEmail();
+
+        var creada = await client.PostAsJsonAsync("/api/users", CrearRequest(email: email));
+        creada.EnsureSuccessStatusCode();
+        var creadaId = (await creada.Content.ReadFromJsonAsync<JsonElement>()).GetProperty("id").GetGuid();
+
+        await client.DeleteAsync($"/api/users/{creadaId}");
+
+        var reactivada = await client.PostAsJsonAsync(
+            "/api/users", CrearRequest(nombre: "Ana Reactivada", email: email));
+
+        Assert.Equal(HttpStatusCode.Created, reactivada.StatusCode);
+        var body = await reactivada.Content.ReadFromJsonAsync<JsonElement>();
+        Assert.Equal(creadaId, body.GetProperty("id").GetGuid()); // misma cuenta, no duplicada
+        Assert.Equal("Ana Reactivada", body.GetProperty("nombre").GetString());
     }
 }

@@ -31,4 +31,10 @@ public interface IUserRepository
 
     /// <summary>Cuántos usuarios tienen el rol dado (p. ej. para proteger al último Admin).</summary>
     Task<int> CountByRoleAsync(UserRole role, CancellationToken ct = default);
+
+    /// <summary>
+    /// Busca por email normalizado incluyendo cuentas eliminadas lógicamente
+    /// (para detectar si hay que reactivar en vez de crear una duplicada, US-001-EDGE5).
+    /// </summary>
+    Task<User?> GetByEmailIncludingDeletedAsync(string normalizedEmail, CancellationToken ct = default);
 }

@@ -38,10 +38,12 @@
 **Estado:** ✅ Cumplida. `dotnet test` → **32/32 verde** (5 escenarios de US-003 + los 27 previos). Edición de nombre/email/rol/estado con métodos de dominio; unicidad de email excluyendo la propia (con variante case-insensitive sin conflicto); protección del último Admin (409); 404 en usuario inexistente.
 **Deferidos:** R2 "no cambiar su propio rol" y US-003-SEC "solo Admin edita a otros" requieren la identidad del actor (It 9–10); botón Guardar deshabilitado → frontend (It 14). Anotado en el servicio y los tests.
 
-## Iteración 6 — Eliminar usuario (US-004, soft-delete)
+## Iteración 6 — Eliminar usuario (US-004, soft-delete) ✅
 
 **Entregable:** `DELETE /api/users/{id}` con **borrado lógico**; **R1** (no el último Admin); no autoeliminación; idempotencia si ya fue eliminado.
 **Done-when:** los escenarios de `features/US-004.feature` pasan (incluye bloqueo del último Admin, autoeliminación, soft-delete conserva el registro).
+**Estado:** ✅ Cumplida. `dotnet test` → **39/39 verde** (6 escenarios nuevos + los 33 previos). `User.SoftDelete()`/`Reactivate()` como invariantes de dominio; filtro global de EF (`HasQueryFilter(!IsDeleted)`) excluye eliminados de listado/edición/segunda-eliminación sin tocar cada repositorio; `IgnoreQueryFilters()` solo para auditoría y para detectar reactivación por email. Desbloqueó dos escenarios deferidos: US-002-AUD (tabla no muestra eliminados) y US-001-EDGE5 (recrear email reactiva la cuenta).
+**Deferidos:** "no autoeliminación" (US-004-V3) y "solo Admin elimina" (US-004-SEC) requieren la identidad del actor autenticado (It 9–10); advertencia del modal para Admin → frontend (It 16).
 
 ## Iteración 7 — Editar el propio perfil (US-005)
 
