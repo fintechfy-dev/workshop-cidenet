@@ -31,10 +31,12 @@
 **Estado:** ✅ Cumplida. `dotnet test` → **27/27 verde** (10 escenarios de US-002 + los 17 previos). Búsqueda parcial case-insensitive con trim, filtros rol/estado combinables, paginación server-side (10/pág) con total y orden determinista, estado vacío, página fuera de rango sin fallar, y respuesta sin contraseña.
 **Deferidos:** exclusión de cuentas eliminadas (US-002-AUD → It 6, soft-delete) y autorización Editor/Viewer (US-002-SEC → It 9–10). Anotado en los tests.
 
-## Iteración 5 — Editar usuario (US-003)
+## Iteración 5 — Editar usuario (US-003) ✅
 
 **Entregable:** `PUT /api/users/{id}` (solo Admin); edición de datos/rol/estado; email único al cambiar; **R2** (no su propio rol); **protección del último Admin** al cambiar rol.
 **Done-when:** los escenarios de `features/US-003.feature` pasan (incluye negativos R2, último-Admin, email en uso, Editor→403).
+**Estado:** ✅ Cumplida. `dotnet test` → **32/32 verde** (5 escenarios de US-003 + los 27 previos). Edición de nombre/email/rol/estado con métodos de dominio; unicidad de email excluyendo la propia (con variante case-insensitive sin conflicto); protección del último Admin (409); 404 en usuario inexistente.
+**Deferidos:** R2 "no cambiar su propio rol" y US-003-SEC "solo Admin edita a otros" requieren la identidad del actor (It 9–10); botón Guardar deshabilitado → frontend (It 14). Anotado en el servicio y los tests.
 
 ## Iteración 6 — Eliminar usuario (US-004, soft-delete)
 

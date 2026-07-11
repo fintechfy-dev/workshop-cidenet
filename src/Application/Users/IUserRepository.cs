@@ -23,4 +23,12 @@ public interface IUserRepository
         int page,
         int pageSize,
         CancellationToken ct = default);
+
+    Task<User?> GetByIdAsync(Guid id, CancellationToken ct = default);
+
+    /// <summary>¿Otro usuario (distinto de excludeId) ya usa este email normalizado?</summary>
+    Task<bool> ExistsByEmailExceptAsync(string normalizedEmail, Guid excludeId, CancellationToken ct = default);
+
+    /// <summary>Cuántos usuarios tienen el rol dado (p. ej. para proteger al último Admin).</summary>
+    Task<int> CountByRoleAsync(UserRole role, CancellationToken ct = default);
 }

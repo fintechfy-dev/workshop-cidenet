@@ -52,4 +52,38 @@ public class User : Entity
 
         return new User(trimmedName, email.Value, role, status, passwordHash);
     }
+
+    public void Rename(string? name)
+    {
+        var trimmedName = (name ?? string.Empty).Trim();
+
+        if (trimmedName.Length < 2 || trimmedName.Length > 100)
+        {
+            throw new DomainValidationException(
+                "El nombre debe tener entre 2 y 100 caracteres.");
+        }
+
+        Name = trimmedName;
+        Touch();
+    }
+
+    public void ChangeEmail(Email email)
+    {
+        Email = email.Value;
+        Touch();
+    }
+
+    public void ChangeRole(UserRole role)
+    {
+        Role = role;
+        Touch();
+    }
+
+    public void ChangeStatus(UserStatus status)
+    {
+        Status = status;
+        Touch();
+    }
+
+    private void Touch() => UpdatedAt = DateTime.UtcNow;
 }
