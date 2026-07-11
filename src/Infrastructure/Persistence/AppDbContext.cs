@@ -1,3 +1,4 @@
+using Domain.Permissions;
 using Domain.Users;
 using Microsoft.EntityFrameworkCore;
 
@@ -13,6 +14,7 @@ public class AppDbContext : DbContext
     }
 
     public DbSet<User> Users => Set<User>();
+    public DbSet<Permission> Permissions => Set<Permission>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -33,6 +35,15 @@ public class AppDbContext : DbContext
             // eliminadas; el registro físico se conserva y solo se accede a él
             // explícitamente vía IgnoreQueryFilters (auditoría, reactivación de email).
             entity.HasQueryFilter(u => !u.IsDeleted);
+        });
+
+        modelBuilder.Entity<Permission>(entity =>
+        {
+            entity.HasKey(p => p.Id);
+            entity.Property(p => p.Role).HasConversion<string>().IsRequired();
+            entity.Property(p => p.Resource).HasConversion<string>().IsRequired();
+            entity.Property(p => p.Action).HasConversion<string>().IsRequired();
+            entity.HasIndex(p => new { p.Role, p.Resource, p.Action }).IsUnique();
         });
     }
 }

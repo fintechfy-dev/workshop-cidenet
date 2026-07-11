@@ -52,10 +52,12 @@
 **Estado:** ✅ Cumplida. `dotnet test` → **45/45 verde** (6 escenarios nuevos + los 39 previos). Alcance self resuelto con un marcador provisional de identidad (header `X-User-Id`, reemplazable por sesión real en It 9–10); rol/estado quedan de solo lectura simplemente porque `EditMyProfileRequest` no los declara en el contrato (R2/R3); cambio de contraseña verifica la actual con `IPasswordHasher.Verify` (bcrypt) antes de aplicar la nueva.
 **Deferido:** "No puedo editar el perfil de otro usuario" vía `PUT /api/users/{id}` directo (autorización por rol) requiere identidad real de sesión (It 9–10), mismo caso que US-003-SEC.
 
-## Iteración 8 — Matriz de permisos (US-006)
+## Iteración 8 — Matriz de permisos (US-006) ✅
 
 **Entregable:** `GET/PUT /api/permissions` (solo Admin); toggles por rol×recurso×acción; roles fijos; **R3** (no modificar el propio rol Admin); **anti-lockout** de Admin; el cambio rige la autorización efectiva.
 **Done-when:** los escenarios de `features/US-006.feature` pasan (incluye R3, anti-lockout, efecto sobre autorización, Editor→403).
+**Estado:** ✅ Cumplida. `dotnet test` → **50/50 verde** (5 escenarios nuevos + los 45 previos). Matriz sembrada perezosamente con los defaults del caso (sección 4 del brief) la primera vez que se consulta o edita. R3 y el anti-lockout se resolvieron como una sola regla: los permisos del rol Admin son inmutables desde este endpoint (solo un Admin llega aquí, así que "el rol que él mismo posee" es siempre Admin) — bloquear cualquier cambio a esa fila cubre ambos escenarios sin necesitar todavía identidad puntual del actor.
+**Deferidos:** "el cambio rige la autorización efectiva" (que otros endpoints respeten la matriz) es transversal → It 10. "Solo Admin accede" (US-006-SEC) requiere autenticación → It 9–10.
 
 ## Iteración 9 — Autenticación y bloqueo de inactivos (US-007)
 

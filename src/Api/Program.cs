@@ -1,4 +1,6 @@
+using Api.Permissions;
 using Api.Users;
+using Application.Permissions;
 using Application.Users;
 using Infrastructure.Persistence;
 using Infrastructure.Security;
@@ -30,12 +32,14 @@ if (!builder.Environment.IsEnvironment("Testing"))
 }
 
 builder.Services.AddScoped<IUserRepository, UserRepository>();
+builder.Services.AddScoped<IPermissionRepository, PermissionRepository>();
 builder.Services.AddSingleton<IPasswordHasher, BcryptPasswordHasher>();
 builder.Services.AddScoped<CreateUserService>();
 builder.Services.AddScoped<ListUsersService>();
 builder.Services.AddScoped<EditUserService>();
 builder.Services.AddScoped<DeleteUserService>();
 builder.Services.AddScoped<EditMyProfileService>();
+builder.Services.AddScoped<PermissionsService>();
 
 var app = builder.Build();
 
@@ -145,6 +149,27 @@ app.MapPut("/api/users/me", async (HttpRequest request, EditMyProfileRequest bod
     };
 })
 .WithName("EditMyProfile");
+
+app.MapGet("/api/permissions", async (PermissionsService service) =>
+    Results.Ok(await service.GetMatrixAsync()))
+.WithName("GetPermissionMatrix");
+
+app.MapPut("/api/permissions", async (EditPermissionsRequest request, PermissionsService service) =>
+{
+    var changes = (request.Cambios ?? [])
+        .Select(c => new PermissionChangeCommand(c.Rol, c.Recurso, c.Accion, c.Permitido))
+        .ToList();
+
+    var result = await service.EditMatrixAsync(changes);
+
+    return result.Outcome switch
+    {
+        EditPermissionsOutcome.Updated => Results.Ok(result.Matrix),
+        EditPermissionsOutcome.Conflict => Results.Conflict(new { error = result.Error }),
+        _ => Results.BadRequest(new { error = result.Error })
+    };
+})
+.WithName("EditPermissionMatrix");
 
 // El AppDbContext queda registrado y listo. Cuando definas tu dominio y tu
 // primera migración, aplícala al arrancar (ej.):
