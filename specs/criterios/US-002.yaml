@@ -1,0 +1,44 @@
+story_id: "US-002"
+titulo_historia: "Como Admin quiero ver una tabla paginada de usuarios con búsqueda por nombre/email y filtros por rol y estado para encontrar y gestionar cuentas rápidamente"
+criterios_aceptacion:
+  escenarios_exito:
+    - id: "US-002-E1"
+      descripcion: "El Admin ve una tabla con columnas nombre, email, rol y estado por cada usuario, con acciones por fila (editar, eliminar)."
+    - id: "US-002-E2"
+      descripcion: "La tabla está paginada (10 usuarios por página por defecto) y muestra el total de registros y el número de páginas."
+    - id: "US-002-E3"
+      descripcion: "El Admin escribe en el buscador y la tabla filtra por coincidencia parcial en nombre o email; los filtros por rol y por estado se aplican y son combinables entre sí y con la búsqueda."
+  validaciones_reglas:
+    - id: "US-002-V1"
+      descripcion: "La búsqueda por nombre/email es parcial (substring) y case-insensitive."
+    - id: "US-002-V2"
+      descripcion: "El filtro por rol acepta uno de los roles válidos (Admin, Editor, Viewer) o 'todos'. El filtro por estado acepta activo, inactivo o 'todos'."
+    - id: "US-002-V3"
+      descripcion: "Autorización: el Admin ve la tabla con acciones de gestión (editar/eliminar). El Editor puede ver la tabla en modo solo lectura (sin acciones de gestión), según la matriz (users → Editor: R). El Viewer no tiene acceso a la lista de usuarios."
+  manejo_errores:
+    - id: "US-002-ERR1"
+      descripcion: "Si la combinación de búsqueda/filtros no arroja resultados, la tabla muestra un estado vacío con un mensaje claro (p. ej. 'No se encontraron usuarios con esos criterios'), sin error."
+    - id: "US-002-ERR2"
+      descripcion: "Si se solicita una página fuera de rango, el sistema devuelve la página válida más cercana (o vacía) sin fallar."
+  requisitos_ux:
+    - id: "US-002-UX1"
+      descripcion: "La paginación es server-side (no se cargan todos los usuarios en memoria) para escalar con muchos registros."
+    - id: "US-002-UX2"
+      descripcion: "Indicador de carga mientras se consultan datos; el total de resultados es visible; los filtros activos se muestran y se pueden limpiar."
+    - id: "US-002-CFG1"
+      descripcion: "[Completitud/CFG · 💡 Mejora] El tamaño de página (usuarios por página) es un parámetro configurable, no un valor fijo en el código. Por defecto 10."
+  casos_edge:
+    - id: "US-002-EDGE1"
+      descripcion: "Los espacios al inicio/fin del término de búsqueda se recortan antes de filtrar."
+    - id: "US-002-EDGE2"
+      descripcion: "El orden de resultados es estable y determinista (p. ej. por nombre o por fecha de creación) para que la paginación sea consistente."
+    - id: "US-002-EDGE3"
+      descripcion: "[Completitud/AUD] La tabla lista únicamente cuentas NO eliminadas (soft-delete): los registros marcados como eliminados no aparecen en la operación normal, aunque se conservan para auditoría."
+validacion_smart:
+  specific: true
+  measurable: true
+  achievable: true
+  relevant: true
+  testable: true
+notas:
+  - "Autorización de lectura de Editor sobre la tabla: comportamiento de solo-lectura; el detalle de UI (ocultar vs. deshabilitar acciones) se puede afinar en Completitud (área Seguridad/UX)."

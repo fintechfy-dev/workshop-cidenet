@@ -1,0 +1,56 @@
+story_id: "US-001"
+titulo_historia: "Como Admin quiero crear una cuenta de usuario (nombre, email, contraseña, rol, estado) para dar acceso a nuevas personas al sistema"
+criterios_aceptacion:
+  escenarios_exito:
+    - id: "US-001-E1"
+      descripcion: "El Admin abre el formulario de creación, llena nombre, email, contraseña, confirmación de contraseña, selecciona un rol y guarda; el sistema crea la cuenta con estado Activo por defecto, la muestra en la tabla de usuarios y confirma la creación."
+  validaciones_reglas:
+    - id: "US-001-V1"
+      descripcion: "Los 5 campos son obligatorios: nombre, email, contraseña, rol y estado. Ninguno puede quedar vacío."
+    - id: "US-001-V2"
+      descripcion: "El email debe tener formato válido (patrón algo@dominio)."
+    - id: "US-001-V3"
+      descripcion: "El email debe ser único en todo el sistema; no puede coincidir con el de otra cuenta existente (R4)."
+    - id: "US-001-V4"
+      descripcion: "La contraseña debe tener mínimo 8 caracteres e incluir al menos una mayúscula, una minúscula y un número."
+    - id: "US-001-V5"
+      descripcion: "El rol seleccionado debe ser uno de los válidos (Admin, Editor o Viewer) y debe ser exactamente uno."
+    - id: "US-001-V6"
+      descripcion: "El formulario incluye un campo de confirmación de contraseña; su valor debe coincidir exactamente con la contraseña ingresada."
+    - id: "US-001-V7"
+      descripcion: "La funcionalidad de crear usuario solo es visible y accesible para el rol Admin. Editor y Viewer no ven ni pueden acceder a esta acción."
+  manejo_errores:
+    - id: "US-001-ERR1"
+      descripcion: "Si alguna validación falla, la cuenta NO se crea."
+    - id: "US-001-ERR2"
+      descripcion: "Cada campo inválido muestra un mensaje inline junto al campo, indicando qué corregir."
+    - id: "US-001-ERR3"
+      descripcion: "Se muestra además un mensaje resumen que lista todos los pendientes/errores del formulario."
+    - id: "US-001-ERR4"
+      descripcion: "Si el email ya existe en el sistema, no se crea la cuenta y el campo email indica que ya está registrado (R4)."
+    - id: "US-001-ERR5"
+      descripcion: "Si la contraseña y su confirmación no coinciden, no se crea la cuenta y se muestra un mensaje inline en el campo de confirmación."
+  requisitos_ux:
+    - id: "US-001-UX1"
+      descripcion: "El botón Guardar permanece deshabilitado mientras algún campo sea inválido; solo se habilita cuando todos los campos cumplen sus validaciones."
+    - id: "US-001-UX2"
+      descripcion: "Validación inline por campo + mensaje resumen visible con el consolidado de errores pendientes."
+  casos_edge:
+    - id: "US-001-EDGE1"
+      descripcion: "El email es case-insensitive: 'Ana@x.com' y 'ana@x.com' se consideran el mismo email para efectos de unicidad."
+    - id: "US-001-EDGE2"
+      descripcion: "Se recortan (trim) los espacios al inicio y fin del nombre y del email antes de validar y guardar."
+    - id: "US-001-EDGE3"
+      descripcion: "La unicidad del email es absoluta: nunca pueden existir dos cuentas con el mismo email, incluso ante creación concurrente (garantía a nivel de almacenamiento, no solo de validación previa)."
+    - id: "US-001-EDGE4"
+      descripcion: "Límites de longitud: nombre entre 2 y 100 caracteres (se permiten letras, espacios y acentos); email máximo 254 caracteres (límite del estándar RFC 5321)."
+    - id: "US-001-EDGE5"
+      descripcion: "[Completitud/AUD · ⚡ Importante] Si el email a crear coincide con el de una cuenta eliminada lógicamente (soft-delete), el sistema NO crea una cuenta nueva ni la rechaza: recupera/reactiva la cuenta anterior (la reactiva, actualiza sus datos con el formulario y limpia la marca de eliminación), preservando su historia. La unicidad absoluta del email se mantiene sobre todos los registros, incluidos los eliminados."
+validacion_smart:
+  specific: true
+  measurable: true
+  achievable: true
+  relevant: true
+  testable: true
+notas:
+  - "Hashing/almacenamiento seguro de la contraseña: diferido a la fase de Completitud (área Seguridad)."
