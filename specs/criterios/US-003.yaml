@@ -1,0 +1,40 @@
+story_id: "US-003"
+titulo_historia: "Como Admin quiero editar los datos, el rol y el estado de un usuario para mantener la información y los accesos al día"
+criterios_aceptacion:
+  escenarios_exito:
+    - id: "US-003-E1"
+      descripcion: "El Admin abre la edición de un usuario existente; el formulario viene pre-cargado con nombre, email, rol y estado actuales. Modifica los campos permitidos, guarda, y el sistema actualiza la cuenta, refleja el cambio en la tabla y confirma."
+  validaciones_reglas:
+    - id: "US-003-V1"
+      descripcion: "Aplican las mismas validaciones de datos que en la creación: nombre 2-100 caracteres, email con formato válido y ≤254 caracteres, rol válido (exactamente uno)."
+    - id: "US-003-V2"
+      descripcion: "El email debe seguir siendo único; puede conservar el suyo, pero no puede cambiarse a uno que ya use otra cuenta (unicidad absoluta, case-insensitive)."
+    - id: "US-003-V3"
+      descripcion: "R2: un usuario no puede modificar su propio rol. Si el Admin edita su propia cuenta, el selector de rol está deshabilitado."
+    - id: "US-003-V4"
+      descripcion: "La contraseña no se edita en este formulario (solo se define al crear)."
+    - id: "US-003-V5"
+      descripcion: "Autorización: solo el rol Admin puede editar cuentas de otros usuarios."
+  manejo_errores:
+    - id: "US-003-ERR1"
+      descripcion: "Si el email cambia a uno ya usado por otra cuenta, no se guarda y el campo email indica el conflicto."
+    - id: "US-003-ERR2"
+      descripcion: "Validación inline por campo + mensaje resumen; el botón Guardar permanece deshabilitado mientras haya campos inválidos o no haya cambios."
+    - id: "US-003-ERR3"
+      descripcion: "Regla derivada de R1: no se puede quitar el rol Admin al ÚLTIMO usuario con rol Admin (dejaría al sistema sin administradores). El intento se bloquea con un mensaje explicativo."
+  requisitos_ux:
+    - id: "US-003-UX1"
+      descripcion: "Formulario pre-cargado con los datos actuales; cambios de estado (activo/inactivo) mediante toggle."
+  casos_edge:
+    - id: "US-003-EDGE1"
+      descripcion: "Cambiar el email a una variante que solo difiere en mayúsculas/minúsculas del propio se considera el mismo email (permitido, sin conflicto)."
+    - id: "US-003-EDGE2"
+      descripcion: "Edición concurrente del mismo usuario por dos Admins: se define una política de consistencia (p. ej. detección de conflicto / última escritura gana). Detalle a afinar en Completitud."
+validacion_smart:
+  specific: true
+  measurable: true
+  achievable: true
+  relevant: true
+  testable: true
+notas:
+  - "US-003-ERR3 (proteger al último Admin al cambiar rol) es una extensión lógica de R1 añadida por buenas prácticas; revisar en Completitud junto con R1."

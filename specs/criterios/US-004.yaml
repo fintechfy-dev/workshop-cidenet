@@ -1,0 +1,35 @@
+story_id: "US-004"
+titulo_historia: "Como Admin quiero eliminar una cuenta de usuario, con confirmación explícita, para revocar el acceso de personas que ya no deben tenerlo"
+criterios_aceptacion:
+  escenarios_exito:
+    - id: "US-004-E1"
+      descripcion: "El Admin pulsa 'eliminar' en una fila; se abre un modal de confirmación que muestra nombre, email y rol del usuario. Al confirmar explícitamente, la cuenta se elimina, desaparece de la tabla y el sistema confirma la operación."
+  validaciones_reglas:
+    - id: "US-004-V1"
+      descripcion: "R1: no se puede eliminar el último usuario con rol Admin. El sistema verifica esta condición antes de eliminar."
+    - id: "US-004-V2"
+      descripcion: "Autorización: solo el rol Admin puede eliminar cuentas."
+    - id: "US-004-V3"
+      descripcion: "Un Admin no puede eliminar su propia cuenta (evita autolockout accidental); debe hacerlo otro Admin."
+  manejo_errores:
+    - id: "US-004-ERR1"
+      descripcion: "Si se intenta eliminar el último Admin, la operación se bloquea y se muestra un mensaje explicativo (p. ej. 'No se puede eliminar el último administrador del sistema')."
+    - id: "US-004-ERR2"
+      descripcion: "Si el usuario ya fue eliminado (p. ej. por otro Admin en paralelo), se informa que la cuenta ya no existe, sin fallar."
+  requisitos_ux:
+    - id: "US-004-UX1"
+      descripcion: "La eliminación siempre requiere confirmación explícita en el modal; el modal muestra una advertencia destacada cuando el usuario a eliminar tiene rol Admin."
+  casos_edge:
+    - id: "US-004-EDGE1"
+      descripcion: "[Completitud/AUD · ⚡ Importante] La eliminación es LÓGICA (soft-delete): la cuenta se marca como eliminada (p. ej. fecha_eliminacion), desaparece de la tabla y de la operación, pero el registro NUNCA se borra físicamente por defecto, para preservar el rastro de auditoría. Nada dependiente de la cuenta se pierde."
+    - id: "US-004-EDGE2"
+      descripcion: "[Completitud/AUD · 💡 Mejora] Una política de retención de datos (p. ej. 12 o 24 meses) podrá purgar físicamente registros eliminados hace tiempo. Es un proceso posterior/configurable, no parte del flujo de eliminación por defecto (ver área MNT)."
+validacion_smart:
+  specific: true
+  measurable: true
+  achievable: true
+  relevant: true
+  testable: true
+notas:
+  - "US-004-V3 (no autoeliminación) añadido por buenas prácticas; no es explícito en el brief. Revisar en Completitud."
+  - "Estrategia de borrado físico vs. lógico: diferida a Completitud (áreas Auditoría/Mantenibilidad)."

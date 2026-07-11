@@ -1,0 +1,35 @@
+story_id: "US-007"
+titulo_historia: "Como usuario del sistema quiero autenticarme para acceder a la plataforma; y como sistema, debo impedir el acceso a usuarios inactivos"
+criterios_aceptacion:
+  escenarios_exito:
+    - id: "US-007-E1"
+      descripcion: "Un usuario con estado Activo ingresa email y contraseña correctos y el sistema lo autentica, permitiéndole acceder según los permisos de su rol."
+  validaciones_reglas:
+    - id: "US-007-V1"
+      descripcion: "Email y contraseña son obligatorios para intentar autenticar."
+    - id: "US-007-V2"
+      descripcion: "R6: un usuario con estado Inactivo NO puede autenticarse, aunque sus credenciales sean correctas."
+    - id: "US-007-V3"
+      descripcion: "El email se trata case-insensitive al identificar la cuenta (coherente con la unicidad de creación)."
+  manejo_errores:
+    - id: "US-007-ERR1"
+      descripcion: "Credenciales inválidas (email inexistente o contraseña incorrecta): se rechaza con un mensaje genérico que no revela si el email existe o si la contraseña era el problema (evita enumeración de usuarios)."
+    - id: "US-007-ERR2"
+      descripcion: "Usuario inactivo con credenciales correctas: se rechaza el acceso con un mensaje que indica que la cuenta está inactiva (p. ej. 'Cuenta inactiva, contacte al administrador')."
+  requisitos_ux:
+    - id: "US-007-UX1"
+      descripcion: "Formulario de login simple (email + contraseña); el bloqueo de cuenta inactiva se comunica con claridad."
+  casos_edge:
+    - id: "US-007-EDGE1"
+      descripcion: "[Completitud/USR · ⚡ Importante] Si un usuario es desactivado mientras tiene una sesión activa, esa sesión se invalida de inmediato: la siguiente acción que intente es rechazada y se le fuerza el cierre de sesión. La desactivación no espera al próximo login."
+    - id: "US-007-EDGE2"
+      descripcion: "Protección contra fuerza bruta (rate limiting / bloqueo tras N intentos) diferida a Completitud; fuera del alcance mínimo del MVP de US-007."
+validacion_smart:
+  specific: true
+  measurable: true
+  achievable: true
+  relevant: true
+  testable: true
+notas:
+  - "Alcance mínimo confirmado: login + bloqueo de inactivos (sin recuperación de contraseña ni MFA)."
+  - "Mecanismo concreto de sesión/token, verificación de hash y rate limiting: se detallan en Completitud (área Seguridad)."

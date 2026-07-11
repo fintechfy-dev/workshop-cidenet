@@ -1,0 +1,36 @@
+story_id: "US-006"
+titulo_historia: "Como Admin quiero activar/desactivar permisos por rol en una matriz (recurso × acción CRUD) para ajustar qué puede hacer cada rol sobre cada recurso"
+criterios_aceptacion:
+  escenarios_exito:
+    - id: "US-006-E1"
+      descripcion: "El Admin ve una matriz de permisos por rol (Admin, Editor, Viewer) sobre los recursos users, roles, permissions y reports, cada uno con las 4 acciones (Create, Read, Update, Delete). Los toggles reflejan el estado actual (la matriz del brief es el estado por defecto)."
+    - id: "US-006-E2"
+      descripcion: "El Admin activa o desactiva un permiso individual mediante un toggle; el cambio se persiste y el sistema confirma. Los permisos persistidos rigen la autorización efectiva del sistema."
+  validaciones_reglas:
+    - id: "US-006-V1"
+      descripcion: "Los roles son predefinidos (Admin, Editor, Viewer): no se pueden crear ni eliminar roles, solo configurar sus permisos."
+    - id: "US-006-V2"
+      descripcion: "R3: un usuario no puede asignarse permisos a sí mismo. El Admin no puede modificar los permisos del rol que él mismo posee (rol Admin), evitando la auto-asignación/escalada."
+    - id: "US-006-V3"
+      descripcion: "Autorización: solo el rol Admin accede a la matriz de permisos (permissions → Admin: CRUD)."
+  manejo_errores:
+    - id: "US-006-ERR1"
+      descripcion: "Se impide dejar al rol Admin sin sus permisos de gestión esenciales sobre users/roles/permissions, para no bloquear la administración del sistema (evitar lockout). El intento se rechaza con mensaje explicativo."
+    - id: "US-006-ERR2"
+      descripcion: "Si falla la persistencia de un cambio, el toggle vuelve a su estado anterior y se informa el error."
+  requisitos_ux:
+    - id: "US-006-UX1"
+      descripcion: "La matriz muestra claramente rol × recurso × acción; el estado de cada permiso es visible de un vistazo; los cambios se confirman de forma clara."
+  casos_edge:
+    - id: "US-006-EDGE1"
+      descripcion: "Edición concurrente de la matriz por dos Admins: política de consistencia a afinar en Completitud."
+    - id: "US-006-EDGE2"
+      descripcion: "Cambiar un permiso debe reflejarse en la autorización efectiva de las demás historias (p. ej. si se retira 'users:update' a Editor, deja de poder actualizar). La coherencia permiso↔efecto es parte del criterio."
+validacion_smart:
+  specific: true
+  measurable: true
+  achievable: true
+  relevant: true
+  testable: true
+notas:
+  - "US-006-V2 (interpretación de R3 sobre el propio rol) y US-006-ERR1 (anti-lockout de Admin) son decisiones de criterio por buenas prácticas; validar en Completitud (área Seguridad)."

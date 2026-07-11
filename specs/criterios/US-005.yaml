@@ -1,0 +1,38 @@
+story_id: "US-005"
+titulo_historia: "Como usuario de cualquier rol quiero editar mi propio perfil para mantener mis datos actualizados, sin poder cambiar mi rol ni mis permisos"
+criterios_aceptacion:
+  escenarios_exito:
+    - id: "US-005-E1"
+      descripcion: "Un usuario autenticado (Admin, Editor o Viewer) abre su propio perfil, actualiza sus datos personales (nombre, email y opcionalmente su contraseña), guarda, y el sistema actualiza únicamente su propia cuenta y confirma."
+  validaciones_reglas:
+    - id: "US-005-V1"
+      descripcion: "El usuario solo puede editar SU propia cuenta; no puede editar la de otros (alcance self, recurso users acción update)."
+    - id: "US-005-V2"
+      descripcion: "R2: no puede cambiar su propio rol. R3: no puede asignarse permisos a sí mismo. Rol y estado NO son editables desde el perfil propio (solo lectura)."
+    - id: "US-005-V3"
+      descripcion: "Aplican las validaciones de datos: nombre 2-100, email con formato válido, ≤254, único (case-insensitive, excluyendo su cuenta actual)."
+    - id: "US-005-V4"
+      descripcion: "Si el usuario cambia su contraseña, la nueva debe cumplir la política (≥8, con mayúscula, minúscula y número) y confirmarse; se recomienda exigir la contraseña actual para autorizar el cambio."
+  manejo_errores:
+    - id: "US-005-ERR1"
+      descripcion: "Intento de acceder o editar el perfil de otro usuario: se rechaza con error de autorización (403 / prohibido)."
+    - id: "US-005-ERR2"
+      descripcion: "Email cambiado a uno ya usado por otra cuenta: no se guarda y el campo indica el conflicto."
+    - id: "US-005-ERR3"
+      descripcion: "Validación inline por campo + resumen; botón Guardar deshabilitado mientras haya campos inválidos."
+  requisitos_ux:
+    - id: "US-005-UX1"
+      descripcion: "Los campos de rol y estado se muestran como solo lectura; los campos editables quedan claramente diferenciados."
+  casos_edge:
+    - id: "US-005-EDGE1"
+      descripcion: "Trim de espacios y trato case-insensitive del email, igual que en creación."
+    - id: "US-005-EDGE2"
+      descripcion: "Un usuario inactivo no llega a este flujo porque no puede autenticarse (R6)."
+validacion_smart:
+  specific: true
+  measurable: true
+  achievable: true
+  relevant: true
+  testable: true
+notas:
+  - "Exigir la contraseña actual para cambiarla (US-005-V4) es una recomendación de buenas prácticas; confirmar en Completitud (área Seguridad)."
