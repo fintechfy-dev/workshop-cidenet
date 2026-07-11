@@ -94,10 +94,12 @@
 **Estado:** ✅ Cumplida. `npm test` → 8/8 verde (7 escenarios nuevos de `UsersTable` + el smoke test previo de `App`). `UsersTablePage` (`frontend/src/pages/UsersTable.tsx`) llama a `GET /api/users` vía el cliente real (`api/client.ts`), con búsqueda debounced, filtros de rol/estado, paginación, y estados carga/vacío/error/sin-acceso (403 → Viewer). Las acciones (editar/eliminar) solo se muestran si el actor (`auth/session.ts`, provisional hasta el login de It16) es Admin. Verificado en navegador (Playwright) contra el stack real `docker compose up --build` (Postgres + API + Vite), incluyendo la vista de Editor sin columna de acciones.
 **De paso:** se cerró un gap pendiente desde la Iteración 2 — nunca existía una migración EF real, así que `docker compose up` no funcionaba contra Postgres. Se generó `InitialCreate` y se aplica al arrancar fuera de `Testing` (ver commit `fix:` previo).
 
-## Iteración 14 — Frontend: formulario crear/editar
+## Iteración 14 — Frontend: formulario crear/editar ✅
 
 **Entregable:** formulario con validación inline por campo + mensaje resumen + botón Guardar deshabilitado hasta que sea válido; confirmación de contraseña; conectado a crear/editar.
 **Done-when:** tests de componente del formulario en verde (incluye estados inválidos y Guardar deshabilitado).
+**Estado:** ✅ Cumplida. `npm test` → 21/21 verde (13 escenarios nuevos de `UserForm` + los 8 previos). Un solo componente (`frontend/src/pages/UserForm.tsx`) cubre crear/editar según `modo`: validación inline por campo (nombre, email, política de contraseña, confirmación, rol obligatorio) + resumen de pendientes; Guardar deshabilitado mientras haya errores o (en edición) mientras no haya cambios; R2 deshabilita el selector de rol al editar la propia cuenta; conflicto de email (409 del backend) se muestra inline. Conectado a `createUser`/`updateUser` reales en `api/client.ts`.
+**Pendiente de cablear:** la tabla (It13) todavía no invoca este formulario desde sus botones Editar/Nuevo — se integra junto con el modal de eliminación en It16, cuando también se agregue el login y el layout final de la app.
 
 ## Iteración 15 — Frontend: matriz de permisos
 

@@ -25,6 +25,15 @@ function authHeaders(): HeadersInit {
   return session ? { "X-User-Id": session.id } : {};
 }
 
+async function readErrorMessage(response: Response, fallback: string): Promise<string> {
+  try {
+    const body = (await response.json()) as { error?: string };
+    return body?.error ?? fallback;
+  } catch {
+    return fallback;
+  }
+}
+
 export interface UserRow {
   id: string;
   nombre: string;
@@ -60,6 +69,50 @@ export async function listUsers(params: ListUsersParams = {}): Promise<PagedUser
 
   if (!response.ok) {
     throw new ApiError("No se pudo cargar la lista de usuarios.", response.status);
+  }
+
+  return response.json();
+}
+
+export interface CreateUserPayload {
+  nombre: string;
+  email: string;
+  password: string;
+  confirmPassword: string;
+  rol: string;
+  estado: string;
+}
+
+export interface EditUserPayload {
+  nombre: string;
+  email: string;
+  rol: string;
+  estado: string;
+}
+
+export async function createUser(payload: CreateUserPayload): Promise<UserRow> {
+  const response = await fetch(`${API_BASE_URL}/api/users`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json", ...authHeaders() },
+    body: JSON.stringify(payload),
+  });
+
+  if (!response.ok) {
+    throw new ApiError(await readErrorMessage(response, "No se pudo crear el usuario."), response.status);
+  }
+
+  return response.json();
+}
+
+export async function updateUser(id: string, payload: EditUserPayload): Promise<UserRow> {
+  const response = await fetch(`${API_BASE_URL}/api/users/${id}`, {
+    method: "PUT",
+    headers: { "Content-Type": "application/json", ...authHeaders() },
+    body: JSON.stringify(payload),
+  });
+
+  if (!response.ok) {
+    throw new ApiError(await readErrorMessage(response, "No se pudo actualizar el usuario."), response.status);
   }
 
   return response.json();
