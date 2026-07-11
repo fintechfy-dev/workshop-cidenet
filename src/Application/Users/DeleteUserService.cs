@@ -1,3 +1,5 @@
+using Application.Monitoring;
+using Domain.Monitoring;
 using Domain.Users;
 
 namespace Application.Users;
@@ -6,14 +8,21 @@ namespace Application.Users;
 /// Orquesta la eliminación lógica de una cuenta (US-004): protege al último Admin
 /// (R1) y aplica el borrado lógico, que vive como invariante en <see cref="User"/>.
 ///
-/// Nota: "no autoeliminación" (US-004-V3) y "solo Admin elimina" (US-004-SEC)
-/// requieren la identidad del actor autenticado; se incorporan en It 9–10.
+/// MON-2: tras una eliminación exitosa, si quedan pocos Admin activos (umbral
+/// configurable), se emite una alerta de riesgo de gobernanza.
 /// </summary>
 public sealed class DeleteUserService
 {
     private readonly IUserRepository _users;
+    private readonly AlertService _alerts;
+    private readonly MonitoringOptions _options;
 
-    public DeleteUserService(IUserRepository users) => _users = users;
+    public DeleteUserService(IUserRepository users, AlertService alerts, MonitoringOptions options)
+    {
+        _users = users;
+        _alerts = alerts;
+        _options = options;
+    }
 
     public async Task<DeleteUserResult> DeleteAsync(Guid id, CancellationToken ct = default)
     {
@@ -35,6 +44,15 @@ public sealed class DeleteUserService
 
         user.SoftDelete();
         await _users.SaveChangesAsync(ct);
+
+        var activos = await _users.CountActiveByRoleAsync(UserRole.Admin, ct);
+        if (activos <= _options.LowActiveAdminThreshold)
+        {
+            await _alerts.RaiseAsync(
+                AlertType.LowActiveAdmins,
+                $"Quedan solo {activos} Admin(es) activo(s) en el sistema.",
+                ct);
+        }
 
         return DeleteUserResult.Deleted();
     }

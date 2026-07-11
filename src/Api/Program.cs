@@ -1,8 +1,10 @@
 using Api.Audit;
 using Api.Auth;
+using Api.Monitoring;
 using Api.Permissions;
 using Api.Users;
 using Application.Audit;
+using Application.Monitoring;
 using Application.Permissions;
 using Application.Users;
 using Domain.Users;
@@ -38,7 +40,12 @@ if (!builder.Environment.IsEnvironment("Testing"))
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IPermissionRepository, PermissionRepository>();
 builder.Services.AddScoped<IAuditLogRepository, AuditLogRepository>();
+builder.Services.AddScoped<IAlertRepository, AlertRepository>();
+builder.Services.AddScoped<IFailedLoginTracker, FailedLoginTracker>();
 builder.Services.AddSingleton<IPasswordHasher, BcryptPasswordHasher>();
+builder.Services.AddSingleton(
+    builder.Configuration.GetSection("Monitoring").Get<MonitoringOptions>() ?? new MonitoringOptions());
+builder.Services.AddScoped<AlertService>();
 builder.Services.AddScoped<CreateUserService>();
 builder.Services.AddScoped<ListUsersService>();
 builder.Services.AddScoped<EditUserService>();
@@ -59,10 +66,13 @@ app.UseCors(FrontendCorsPolicy);
 app.MapGet("/health", () => Results.Ok(new { status = "ok" }))
     .WithName("HealthCheck");
 
-// Todo lo bajo /api pasa por el filtro de auditoría (US-001-AUD): registra
-// actor, acción (nombre del endpoint), entidad y marca de tiempo de cada
-// request, sin tener que instrumentar cada servicio uno por uno.
-var api = app.MapGroup("/api").AddEndpointFilter<AuditLogFilter>();
+// Todo lo bajo /api pasa por: BackendErrorAlertFilter (MON-3, envuelve todo:
+// observa y alerta ante una excepción no controlada) y AuditLogFilter
+// (US-001-AUD: registra actor, acción, entidad y marca de tiempo de cada
+// request) — sin tener que instrumentar cada servicio uno por uno.
+var api = app.MapGroup("/api")
+    .AddEndpointFilter<BackendErrorAlertFilter>()
+    .AddEndpointFilter<AuditLogFilter>();
 
 api.MapGet("/users", async (
     HttpRequest httpRequest, IUserRepository users,
@@ -274,6 +284,20 @@ api.MapGet("/audit-log", async (HttpRequest httpRequest, IUserRepository users, 
     }));
 })
 .WithName("GetAuditLog");
+
+api.MapGet("/monitoring/alerts", async (HttpRequest httpRequest, IUserRepository users, IAlertRepository alerts) =>
+{
+    var (_, denied) = await AuthorizeAsync(httpRequest, users, UserRole.Admin);
+    if (denied is not null)
+    {
+        return denied;
+    }
+
+    var entries = await alerts.GetAllAsync();
+
+    return Results.Ok(entries.Select(a => new { a.Id, tipo = a.Type.ToString(), mensaje = a.Message, fecha = a.CreatedAt }));
+})
+.WithName("GetAlerts");
 
 // El AppDbContext queda registrado y listo. Cuando definas tu dominio y tu
 // primera migración, aplícala al arrancar (ej.):

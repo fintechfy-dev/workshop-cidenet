@@ -1,4 +1,5 @@
 using Domain.Audit;
+using Domain.Monitoring;
 using Domain.Permissions;
 using Domain.Users;
 using Microsoft.EntityFrameworkCore;
@@ -17,6 +18,8 @@ public class AppDbContext : DbContext
     public DbSet<User> Users => Set<User>();
     public DbSet<Permission> Permissions => Set<Permission>();
     public DbSet<AuditLogEntry> AuditLogEntries => Set<AuditLogEntry>();
+    public DbSet<Alert> Alerts => Set<Alert>();
+    public DbSet<FailedLoginAttempt> FailedLoginAttempts => Set<FailedLoginAttempt>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -55,6 +58,19 @@ public class AppDbContext : DbContext
             entity.Property(e => e.EntityType).IsRequired();
             // Sin FK hacia User: así una entrada sobrevive aunque la cuenta se
             // elimine lógicamente (o si el actor mismo fue eliminado) — US-001-AUD.
+        });
+
+        modelBuilder.Entity<Alert>(entity =>
+        {
+            entity.HasKey(a => a.Id);
+            entity.Property(a => a.Type).HasConversion<string>().IsRequired();
+            entity.Property(a => a.Message).IsRequired();
+        });
+
+        modelBuilder.Entity<FailedLoginAttempt>(entity =>
+        {
+            entity.HasKey(a => a.Id);
+            entity.Property(a => a.NormalizedEmail).IsRequired();
         });
     }
 }

@@ -79,10 +79,11 @@
 **Done-when:** los escenarios de `features/US-001-AUD.feature` pasan (registro por acción, inmutabilidad, persistencia tras soft-delete).
 **Estado:** ✅ Cumplida. `dotnet test` → **67/67 verde** (3 escenarios nuevos + los 64 previos). El registro se llena solo: un `IEndpointFilter` (`AuditLogFilter`) aplicado una vez a todo el grupo `/api` anota actor (`X-User-Id`), acción (el nombre ya declarado con `.WithName` en cada endpoint) y entidad (segmento de la URL) en cada request — sin instrumentar cada servicio de aplicación por separado. `IAuditLogRepository` solo declara `Append`/`GetAll` (append-only por contrato, sin Update/Delete); no hay ninguna ruta de edición/borrado expuesta. Sin FK hacia `User`, así que una entrada sobrevive al soft-delete de la cuenta involucrada. `GET /api/audit-log` (solo Admin) expone el log.
 
-## Iteración 12 — Observabilidad y alertas (US-001-MON)
+## Iteración 12 — Observabilidad y alertas (US-001-MON) ✅
 
 **Entregable:** logging estructurado/métricas para los eventos definidos (fuerza bruta, pocos Admin, errores de backend) con umbrales configurables.
 **Done-when:** los escenarios de `features/US-001-MON.feature` pasan (los tres eventos son observables/alertables).
+**Estado:** ✅ Cumplida. `dotnet test` → **70/70 verde** (3 escenarios nuevos + los 67 previos). `AlertService` centraliza los tres eventos: loguea estructurado (`ILogger`) y persiste en `GET /api/monitoring/alerts` (Admin). MON-1 (fuerza bruta): `LoginService` cuenta fallos recientes por email vía `IFailedLoginTracker`; MON-2 (pocos Admin activos): `EditUserService`/`DeleteUserService` revisan `CountActiveByRoleAsync(Admin)` tras cada cambio exitoso; MON-3 (error de backend): `BackendErrorAlertFilter` envuelve todo el grupo `/api`, captura cualquier excepción no controlada y responde 500 sin filtrar detalles. Umbrales configurables vía `MonitoringOptions` (sección `Monitoring` de la configuración, con defaults de código).
 
 ---
 

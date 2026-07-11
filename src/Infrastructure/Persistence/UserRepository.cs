@@ -72,6 +72,9 @@ public sealed class UserRepository : IUserRepository
     public Task<int> CountByRoleAsync(UserRole role, CancellationToken ct = default) =>
         _db.Users.CountAsync(u => u.Role == role, ct);
 
+    public Task<int> CountActiveByRoleAsync(UserRole role, CancellationToken ct = default) =>
+        _db.Users.CountAsync(u => u.Role == role && u.Status == UserStatus.Activo, ct);
+
     public Task<User?> GetByEmailIncludingDeletedAsync(string normalizedEmail, CancellationToken ct = default) =>
         _db.Users.IgnoreQueryFilters().FirstOrDefaultAsync(u => u.Email == normalizedEmail, ct);
 }

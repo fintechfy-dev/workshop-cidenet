@@ -1,4 +1,6 @@
+using Application.Monitoring;
 using Domain.Common;
+using Domain.Monitoring;
 using Domain.Users;
 
 namespace Application.Users;
@@ -8,14 +10,21 @@ namespace Application.Users;
 /// email (excluyendo la propia), protege al último Admin y persiste los cambios.
 /// Las invariantes de datos viven en el dominio (Email, User).
 ///
-/// Nota: la regla R2 (un usuario no puede cambiar su PROPIO rol) requiere la identidad
-/// del actor autenticado; se incorporará junto con la autenticación (It 9–10).
+/// MON-2: tras cualquier edición exitosa, si quedan pocos Admin activos (umbral
+/// configurable), se emite una alerta de riesgo de gobernanza.
 /// </summary>
 public sealed class EditUserService
 {
     private readonly IUserRepository _users;
+    private readonly AlertService _alerts;
+    private readonly MonitoringOptions _options;
 
-    public EditUserService(IUserRepository users) => _users = users;
+    public EditUserService(IUserRepository users, AlertService alerts, MonitoringOptions options)
+    {
+        _users = users;
+        _alerts = alerts;
+        _options = options;
+    }
 
     public async Task<EditUserResult> EditAsync(Guid id, EditUserCommand command, CancellationToken ct = default)
     {
@@ -53,6 +62,7 @@ public sealed class EditUserService
             user.ChangeStatus(status);
 
             await _users.SaveChangesAsync(ct);
+            await AlertarSiQuedanPocosAdminActivosAsync(ct);
 
             return EditUserResult.Updated(
                 new UserDto(user.Id, user.Name, user.Email, user.Role.ToString(), user.Status.ToString()));
@@ -60,6 +70,18 @@ public sealed class EditUserService
         catch (DomainValidationException ex)
         {
             return EditUserResult.Validation(ex.Message);
+        }
+    }
+
+    private async Task AlertarSiQuedanPocosAdminActivosAsync(CancellationToken ct)
+    {
+        var activos = await _users.CountActiveByRoleAsync(UserRole.Admin, ct);
+        if (activos <= _options.LowActiveAdminThreshold)
+        {
+            await _alerts.RaiseAsync(
+                AlertType.LowActiveAdmins,
+                $"Quedan solo {activos} Admin(es) activo(s) en el sistema.",
+                ct);
         }
     }
 }
