@@ -60,6 +60,9 @@ public sealed class UserRepository : IUserRepository
     public Task<User?> GetByIdAsync(Guid id, CancellationToken ct = default) =>
         _db.Users.FirstOrDefaultAsync(u => u.Id == id, ct);
 
+    public Task<User?> FindByEmailAsync(string normalizedEmail, CancellationToken ct = default) =>
+        _db.Users.FirstOrDefaultAsync(u => u.Email == normalizedEmail, ct);
+
     public Task<bool> ExistsByEmailExceptAsync(string normalizedEmail, Guid excludeId, CancellationToken ct = default) =>
         _db.Users.AnyAsync(u => u.Email == normalizedEmail && u.Id != excludeId, ct);
 

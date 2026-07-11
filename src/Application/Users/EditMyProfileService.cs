@@ -25,8 +25,10 @@ public sealed class EditMyProfileService
     public async Task<EditMyProfileResult> EditAsync(EditMyProfileCommand command, CancellationToken ct = default)
     {
         var actor = await _users.GetByIdAsync(command.ActorId, ct);
-        if (actor is null)
+        if (actor is null || actor.Status != UserStatus.Activo)
         {
+            // US-007-USR: revalida el estado en cada request; si lo desactivaron,
+            // pierde acceso de inmediato sin esperar a un mecanismo de sesión aparte.
             return EditMyProfileResult.Unauthorized();
         }
 

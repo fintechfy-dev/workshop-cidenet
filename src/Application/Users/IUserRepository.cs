@@ -26,6 +26,9 @@ public interface IUserRepository
 
     Task<User?> GetByIdAsync(Guid id, CancellationToken ct = default);
 
+    /// <summary>Busca por email normalizado, excluyendo cuentas eliminadas (para autenticación, US-007).</summary>
+    Task<User?> FindByEmailAsync(string normalizedEmail, CancellationToken ct = default);
+
     /// <summary>¿Otro usuario (distinto de excludeId) ya usa este email normalizado?</summary>
     Task<bool> ExistsByEmailExceptAsync(string normalizedEmail, Guid excludeId, CancellationToken ct = default);
 

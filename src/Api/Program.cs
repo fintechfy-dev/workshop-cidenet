@@ -1,7 +1,9 @@
+using Api.Auth;
 using Api.Permissions;
 using Api.Users;
 using Application.Permissions;
 using Application.Users;
+using Domain.Users;
 using Infrastructure.Persistence;
 using Infrastructure.Security;
 using Microsoft.EntityFrameworkCore;
@@ -40,6 +42,7 @@ builder.Services.AddScoped<EditUserService>();
 builder.Services.AddScoped<DeleteUserService>();
 builder.Services.AddScoped<EditMyProfileService>();
 builder.Services.AddScoped<PermissionsService>();
+builder.Services.AddScoped<LoginService>();
 
 var app = builder.Build();
 
@@ -121,8 +124,10 @@ app.MapGet("/api/users/me", async (HttpRequest request, IUserRepository users) =
     }
 
     var actor = await users.GetByIdAsync(actorId);
-    if (actor is null)
+    if (actor is null || actor.Status != UserStatus.Activo)
     {
+        // US-007-USR: si lo desactivaron, la sesión se corta de inmediato porque
+        // cada request revalida el estado actual (no hay sesión cacheada que revocar).
         return Results.Unauthorized();
     }
 
@@ -170,6 +175,20 @@ app.MapPut("/api/permissions", async (EditPermissionsRequest request, Permission
     };
 })
 .WithName("EditPermissionMatrix");
+
+app.MapPost("/api/auth/login", async (LoginRequest request, LoginService service) =>
+{
+    var result = await service.LoginAsync(new LoginCommand(request.Email, request.Password));
+
+    return result.Outcome switch
+    {
+        LoginOutcome.Success => Results.Ok(result.User),
+        LoginOutcome.InactiveAccount => Results.Json(new { error = result.Error }, statusCode: StatusCodes.Status403Forbidden),
+        LoginOutcome.ValidationFailed => Results.BadRequest(new { error = result.Error }),
+        _ => Results.Json(new { error = result.Error }, statusCode: StatusCodes.Status401Unauthorized)
+    };
+})
+.WithName("Login");
 
 // El AppDbContext queda registrado y listo. Cuando definas tu dominio y tu
 // primera migración, aplícala al arrancar (ej.):

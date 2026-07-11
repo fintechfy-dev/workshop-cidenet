@@ -59,10 +59,12 @@
 **Estado:** ✅ Cumplida. `dotnet test` → **50/50 verde** (5 escenarios nuevos + los 45 previos). Matriz sembrada perezosamente con los defaults del caso (sección 4 del brief) la primera vez que se consulta o edita. R3 y el anti-lockout se resolvieron como una sola regla: los permisos del rol Admin son inmutables desde este endpoint (solo un Admin llega aquí, así que "el rol que él mismo posee" es siempre Admin) — bloquear cualquier cambio a esa fila cubre ambos escenarios sin necesitar todavía identidad puntual del actor.
 **Deferidos:** "el cambio rige la autorización efectiva" (que otros endpoints respeten la matriz) es transversal → It 10. "Solo Admin accede" (US-006-SEC) requiere autenticación → It 9–10.
 
-## Iteración 9 — Autenticación y bloqueo de inactivos (US-007)
+## Iteración 9 — Autenticación y bloqueo de inactivos (US-007) ✅
 
 **Entregable:** `POST /api/auth/login`; verificación contra hash; **R6** (inactivo no entra); mensaje genérico anti-enumeración; **invalidación inmediata de sesión** al desactivar (US-007-USR).
 **Done-when:** los escenarios de `features/US-007.feature` pasan (incluye inactivo bloqueado, credenciales inválidas genéricas, sesión cortada al desactivar).
+**Estado:** ✅ Cumplida. `dotnet test` → **58/58 verde** (8 escenarios nuevos + los 50 previos). Login verifica contra el hash (bcrypt) y devuelve el mismo `UserDto` sin contraseña que ya usa el resto de la API — su `Id` es lo que el cliente reusa como `X-User-Id` (el marcador de identidad de It 7–8), que ahora queda respaldado por credenciales reales en vez de ser un placeholder. La "invalidación inmediata de sesión" (US-007-USR) sale gratis: como no hay sesión cacheada, `GET/PUT /api/users/me` revalidan `Estado=Activo` en cada request, así que desactivar corta el acceso en la siguiente llamada sin mecanismo aparte.
+**Deferido:** rate limiting / bloqueo por fuerza bruta (US-007-EDGE2) queda fuera del MVP, según lo confirmado en Completitud.
 
 ## Iteración 10 — Endurecimiento de seguridad transversal (US-001-SEC)
 
