@@ -15,6 +15,8 @@ public class User : Entity
     public UserRole Role { get; private set; }
     public UserStatus Status { get; private set; }
     public string PasswordHash { get; private set; } = null!;
+    public bool IsDeleted { get; private set; }
+    public DateTime? DeletedAt { get; private set; }
 
     private User()
     {
@@ -82,6 +84,30 @@ public class User : Entity
     public void ChangeStatus(UserStatus status)
     {
         Status = status;
+        Touch();
+    }
+
+    /// <summary>Borrado lógico (US-004-AUD): el registro nunca se borra físicamente.</summary>
+    public void SoftDelete()
+    {
+        IsDeleted = true;
+        DeletedAt = DateTime.UtcNow;
+        Touch();
+    }
+
+    /// <summary>
+    /// Reactiva una cuenta previamente eliminada al recrear su email (US-001-EDGE5),
+    /// en vez de duplicarla.
+    /// </summary>
+    public void Reactivate(string? name, Email email, UserRole role, UserStatus status, string passwordHash)
+    {
+        IsDeleted = false;
+        DeletedAt = null;
+        Rename(name);
+        ChangeEmail(email);
+        ChangeRole(role);
+        ChangeStatus(status);
+        PasswordHash = passwordHash;
         Touch();
     }
 

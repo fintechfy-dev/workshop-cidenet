@@ -27,6 +27,12 @@ public class AppDbContext : DbContext
             entity.Property(u => u.Role).HasConversion<string>().IsRequired();
             entity.Property(u => u.Status).HasConversion<string>().IsRequired();
             entity.Property(u => u.PasswordHash).IsRequired();
+            entity.Property(u => u.IsDeleted).IsRequired();
+
+            // Borrado lógico (US-004-AUD): las operaciones normales no ven cuentas
+            // eliminadas; el registro físico se conserva y solo se accede a él
+            // explícitamente vía IgnoreQueryFilters (auditoría, reactivación de email).
+            entity.HasQueryFilter(u => !u.IsDeleted);
         });
     }
 }

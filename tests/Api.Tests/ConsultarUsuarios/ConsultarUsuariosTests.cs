@@ -19,7 +19,6 @@ namespace Api.Tests.ConsultarUsuarios;
 /// de paginación y totales no se contaminen entre escenarios.
 ///
 /// Deferidos (dependen de otras iteraciones):
-///  - "La tabla no muestra cuentas eliminadas" (US-002-AUD): requiere soft-delete (It 6).
 ///  - "Editor solo lectura / Viewer sin acceso" (US-002-SEC): requiere auth (It 9–10).
 /// </summary>
 public class ConsultarUsuariosTests : IDisposable
@@ -163,6 +162,31 @@ public class ConsultarUsuariosTests : IDisposable
 
         Assert.NotNull(page.Items); // 200 OK, sin fallar; sin resultados en esa página
         Assert.Empty(page.Items);
+    }
+
+    // Scenario (US-002-AUD): La tabla no muestra cuentas eliminadas lógicamente
+    [Fact]
+    public async Task La_tabla_no_muestra_cuentas_eliminadas_logicamente()
+    {
+        await SeedUserAsync("Admin Uno", "admin1@cidenet.com", "Admin", "Activo");
+        var response = await _client.PostAsJsonAsync("/api/users", new
+        {
+            nombre = "Ana Gomez",
+            email = "ana@cidenet.com",
+            password = "Abcdef1x",
+            confirmPassword = "Abcdef1x",
+            rol = "Editor",
+            estado = "Activo"
+        });
+        response.EnsureSuccessStatusCode();
+        var creada = await response.Content.ReadFromJsonAsync<UserRow>(JsonOptions);
+        Assert.NotNull(creada);
+
+        await _client.DeleteAsync($"/api/users/{creada!.Id}");
+
+        var page = await GetUsersAsync("");
+
+        Assert.DoesNotContain(page.Items, u => u.Id == creada.Id);
     }
 
     // Scenario (US-002-SEC): La respuesta de la tabla nunca incluye la contraseña
