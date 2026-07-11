@@ -24,10 +24,12 @@
 **Estado:** ✅ Cumplida. `dotnet test` → **17/17 verde** (16 escenarios de US-001 + health). El modelo de dominio de la Iteración 2 (`User`, `Email`, `UserRole`, `UserStatus`, `PasswordPolicy`) se construyó aquí con sus invariantes.
 **Deferidos (dependen de otras iteraciones):** Viewer→403 (autorización, It 9–10), reactivación de email eliminado (soft-delete, It 6), botón Guardar deshabilitado (frontend, It 14). Sus escenarios están en `features/` y se cubrirán en esas iteraciones.
 
-## Iteración 4 — Consultar usuarios (US-002)
+## Iteración 4 — Consultar usuarios (US-002) ✅
 
 **Entregable:** `GET /api/users` paginado (server-side), búsqueda parcial case-insensitive por nombre/email, filtros por rol y estado combinables; excluye cuentas eliminadas; Editor solo-lectura, Viewer sin acceso.
 **Done-when:** los escenarios de `features/US-002.feature` pasan (incluye vacío, fuera de rango, no expone contraseña, autorización por rol).
+**Estado:** ✅ Cumplida. `dotnet test` → **27/27 verde** (10 escenarios de US-002 + los 17 previos). Búsqueda parcial case-insensitive con trim, filtros rol/estado combinables, paginación server-side (10/pág) con total y orden determinista, estado vacío, página fuera de rango sin fallar, y respuesta sin contraseña.
+**Deferidos:** exclusión de cuentas eliminadas (US-002-AUD → It 6, soft-delete) y autorización Editor/Viewer (US-002-SEC → It 9–10). Anotado en los tests.
 
 ## Iteración 5 — Editar usuario (US-003)
 
