@@ -11,4 +11,16 @@ public interface IUserRepository
     Task AddAsync(User user, CancellationToken ct = default);
 
     Task SaveChangesAsync(CancellationToken ct = default);
+
+    /// <summary>
+    /// Lista usuarios aplicando búsqueda parcial (nombre/email, case-insensitive),
+    /// filtros opcionales por rol y estado, y paginación. Devuelve la página y el total.
+    /// </summary>
+    Task<(IReadOnlyList<User> Items, int Total)> ListAsync(
+        string? search,
+        UserRole? role,
+        UserStatus? status,
+        int page,
+        int pageSize,
+        CancellationToken ct = default);
 }

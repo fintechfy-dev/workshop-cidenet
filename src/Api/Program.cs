@@ -32,6 +32,7 @@ if (!builder.Environment.IsEnvironment("Testing"))
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddSingleton<IPasswordHasher, BcryptPasswordHasher>();
 builder.Services.AddScoped<CreateUserService>();
+builder.Services.AddScoped<ListUsersService>();
 
 var app = builder.Build();
 
@@ -44,6 +45,17 @@ app.UseCors(FrontendCorsPolicy);
 
 app.MapGet("/health", () => Results.Ok(new { status = "ok" }))
     .WithName("HealthCheck");
+
+app.MapGet("/api/users", async (
+    string? search, string? rol, string? estado, int? page, int? pageSize,
+    ListUsersService service) =>
+{
+    var result = await service.ListAsync(new ListUsersQuery(
+        search, rol, estado, page ?? 1, pageSize ?? 10));
+
+    return Results.Ok(result);
+})
+.WithName("ListUsers");
 
 app.MapPost("/api/users", async (CreateUserRequest request, CreateUserService service) =>
 {
