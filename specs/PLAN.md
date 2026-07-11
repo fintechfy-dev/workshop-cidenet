@@ -101,10 +101,12 @@
 **Estado:** ✅ Cumplida. `npm test` → 21/21 verde (13 escenarios nuevos de `UserForm` + los 8 previos). Un solo componente (`frontend/src/pages/UserForm.tsx`) cubre crear/editar según `modo`: validación inline por campo (nombre, email, política de contraseña, confirmación, rol obligatorio) + resumen de pendientes; Guardar deshabilitado mientras haya errores o (en edición) mientras no haya cambios; R2 deshabilita el selector de rol al editar la propia cuenta; conflicto de email (409 del backend) se muestra inline. Conectado a `createUser`/`updateUser` reales en `api/client.ts`.
 **Pendiente de cablear:** la tabla (It13) todavía no invoca este formulario desde sus botones Editar/Nuevo — se integra junto con el modal de eliminación en It16, cuando también se agregue el login y el layout final de la app.
 
-## Iteración 15 — Frontend: matriz de permisos
+## Iteración 15 — Frontend: matriz de permisos ✅
 
 **Entregable:** vista de matriz rol×recurso×acción con toggles conectada a `GET/PUT /api/permissions`; refleja anti-lockout y R3.
 **Done-when:** tests de componente de la matriz en verde.
+**Estado:** ✅ Cumplida. `npm test` → 25/25 verde (4 escenarios nuevos + los 21 previos). `PermissionsMatrixPage` renderiza una fila por rol×recurso (12) con un checkbox por acción (4 = 48 celdas), reflejando el estado real de `GET /api/permissions`; cada toggle llama `PUT /api/permissions` de inmediato (optimista, revierte si falla) y actualiza desde la respuesta del servidor. R3 + anti-lockout: los checkboxes de la fila Admin están deshabilitados en la UI (el backend ya los rechaza en It8; aquí se refuerza para que ni siquiera se pueda intentar).
+**Pendiente de cablear:** integración en el layout final de la app junto con It16.
 
 ## Iteración 16 — Frontend: modal de eliminación + login
 

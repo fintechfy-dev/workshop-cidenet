@@ -117,3 +117,43 @@ export async function updateUser(id: string, payload: EditUserPayload): Promise<
 
   return response.json();
 }
+
+export interface PermissionCell {
+  rol: string;
+  recurso: string;
+  accion: string;
+  permitido: boolean;
+}
+
+export interface PermissionChange {
+  rol: string;
+  recurso: string;
+  accion: string;
+  permitido: boolean;
+}
+
+export async function getPermissionMatrix(): Promise<PermissionCell[]> {
+  const response = await fetch(`${API_BASE_URL}/api/permissions`, {
+    headers: authHeaders(),
+  });
+
+  if (!response.ok) {
+    throw new ApiError(await readErrorMessage(response, "No se pudo cargar la matriz de permisos."), response.status);
+  }
+
+  return response.json();
+}
+
+export async function updatePermissions(cambios: PermissionChange[]): Promise<PermissionCell[]> {
+  const response = await fetch(`${API_BASE_URL}/api/permissions`, {
+    method: "PUT",
+    headers: { "Content-Type": "application/json", ...authHeaders() },
+    body: JSON.stringify({ cambios }),
+  });
+
+  if (!response.ok) {
+    throw new ApiError(await readErrorMessage(response, "No se pudo actualizar el permiso."), response.status);
+  }
+
+  return response.json();
+}
