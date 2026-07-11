@@ -1,6 +1,8 @@
+using Api.Audit;
 using Api.Auth;
 using Api.Permissions;
 using Api.Users;
+using Application.Audit;
 using Application.Permissions;
 using Application.Users;
 using Domain.Users;
@@ -35,6 +37,7 @@ if (!builder.Environment.IsEnvironment("Testing"))
 
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IPermissionRepository, PermissionRepository>();
+builder.Services.AddScoped<IAuditLogRepository, AuditLogRepository>();
 builder.Services.AddSingleton<IPasswordHasher, BcryptPasswordHasher>();
 builder.Services.AddScoped<CreateUserService>();
 builder.Services.AddScoped<ListUsersService>();
@@ -56,7 +59,12 @@ app.UseCors(FrontendCorsPolicy);
 app.MapGet("/health", () => Results.Ok(new { status = "ok" }))
     .WithName("HealthCheck");
 
-app.MapGet("/api/users", async (
+// Todo lo bajo /api pasa por el filtro de auditoría (US-001-AUD): registra
+// actor, acción (nombre del endpoint), entidad y marca de tiempo de cada
+// request, sin tener que instrumentar cada servicio uno por uno.
+var api = app.MapGroup("/api").AddEndpointFilter<AuditLogFilter>();
+
+api.MapGet("/users", async (
     HttpRequest httpRequest, IUserRepository users,
     string? search, string? rol, string? estado, int? page, int? pageSize,
     ListUsersService service) =>
@@ -75,7 +83,7 @@ app.MapGet("/api/users", async (
 })
 .WithName("ListUsers");
 
-app.MapPost("/api/users", async (HttpRequest httpRequest, IUserRepository users, CreateUserRequest request, CreateUserService service) =>
+api.MapPost("/users", async (HttpRequest httpRequest, IUserRepository users, CreateUserRequest request, CreateUserService service) =>
 {
     // Arranque: la primera cuenta del sistema (el Admin semilla) se crea sin
     // exigir autorización porque todavía no existe ningún Admin que la otorgue.
@@ -107,7 +115,7 @@ app.MapPost("/api/users", async (HttpRequest httpRequest, IUserRepository users,
 })
 .WithName("CreateUser");
 
-app.MapPut("/api/users/{id:guid}", async (
+api.MapPut("/users/{id:guid}", async (
     HttpRequest httpRequest, IUserRepository users, Guid id, EditUserRequest request, EditUserService service) =>
 {
     var (actor, denied) = await AuthorizeAsync(httpRequest, users, UserRole.Admin);
@@ -137,7 +145,7 @@ app.MapPut("/api/users/{id:guid}", async (
 })
 .WithName("EditUser");
 
-app.MapDelete("/api/users/{id:guid}", async (HttpRequest httpRequest, IUserRepository users, Guid id, DeleteUserService service) =>
+api.MapDelete("/users/{id:guid}", async (HttpRequest httpRequest, IUserRepository users, Guid id, DeleteUserService service) =>
 {
     var (actor, denied) = await AuthorizeAsync(httpRequest, users, UserRole.Admin);
     if (denied is not null)
@@ -162,7 +170,7 @@ app.MapDelete("/api/users/{id:guid}", async (HttpRequest httpRequest, IUserRepos
 })
 .WithName("DeleteUser");
 
-app.MapGet("/api/users/me", async (HttpRequest httpRequest, IUserRepository users) =>
+api.MapGet("/users/me", async (HttpRequest httpRequest, IUserRepository users) =>
 {
     var (actor, denied) = await AuthorizeAsync(httpRequest, users);
     if (denied is not null)
@@ -174,7 +182,7 @@ app.MapGet("/api/users/me", async (HttpRequest httpRequest, IUserRepository user
 })
 .WithName("GetMyProfile");
 
-app.MapPut("/api/users/me", async (HttpRequest httpRequest, IUserRepository users, EditMyProfileRequest body, EditMyProfileService service) =>
+api.MapPut("/users/me", async (HttpRequest httpRequest, IUserRepository users, EditMyProfileRequest body, EditMyProfileService service) =>
 {
     var (actor, denied) = await AuthorizeAsync(httpRequest, users);
     if (denied is not null)
@@ -195,7 +203,7 @@ app.MapPut("/api/users/me", async (HttpRequest httpRequest, IUserRepository user
 })
 .WithName("EditMyProfile");
 
-app.MapGet("/api/permissions", async (HttpRequest httpRequest, IUserRepository users, PermissionsService service) =>
+api.MapGet("/permissions", async (HttpRequest httpRequest, IUserRepository users, PermissionsService service) =>
 {
     var (_, denied) = await AuthorizeAsync(httpRequest, users, UserRole.Admin);
     if (denied is not null)
@@ -207,7 +215,7 @@ app.MapGet("/api/permissions", async (HttpRequest httpRequest, IUserRepository u
 })
 .WithName("GetPermissionMatrix");
 
-app.MapPut("/api/permissions", async (
+api.MapPut("/permissions", async (
     HttpRequest httpRequest, IUserRepository users, EditPermissionsRequest request, PermissionsService service) =>
 {
     var (_, denied) = await AuthorizeAsync(httpRequest, users, UserRole.Admin);
@@ -231,7 +239,7 @@ app.MapPut("/api/permissions", async (
 })
 .WithName("EditPermissionMatrix");
 
-app.MapPost("/api/auth/login", async (LoginRequest request, LoginService service) =>
+api.MapPost("/auth/login", async (LoginRequest request, LoginService service) =>
 {
     var result = await service.LoginAsync(new LoginCommand(request.Email, request.Password));
 
@@ -244,6 +252,28 @@ app.MapPost("/api/auth/login", async (LoginRequest request, LoginService service
     };
 })
 .WithName("Login");
+
+api.MapGet("/audit-log", async (HttpRequest httpRequest, IUserRepository users, IAuditLogRepository auditLog) =>
+{
+    var (_, denied) = await AuthorizeAsync(httpRequest, users, UserRole.Admin);
+    if (denied is not null)
+    {
+        return denied;
+    }
+
+    var entries = await auditLog.GetAllAsync();
+
+    return Results.Ok(entries.Select(e => new
+    {
+        e.Id,
+        actorId = e.ActorId,
+        accion = e.Action,
+        entidad = e.EntityType,
+        entityId = e.EntityId,
+        fecha = e.CreatedAt
+    }));
+})
+.WithName("GetAuditLog");
 
 // El AppDbContext queda registrado y listo. Cuando definas tu dominio y tu
 // primera migración, aplícala al arrancar (ej.):

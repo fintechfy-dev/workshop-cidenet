@@ -73,10 +73,11 @@
 **Estado:** ✅ Cumplida. `dotnet test` → **64/64 verde** (6 escenarios nuevos + los 58 previos). Autorización real por rol en todos los endpoints de usuarios y permisos vía un helper `AuthorizeAsync` (resuelve el actor por `X-User-Id`, verifica `Estado=Activo` y el rol permitido). Arranque: la primera cuenta del sistema se crea sin exigir autorización (todavía no hay Admin que la otorgue); de ahí en adelante, `POST/PUT/DELETE /api/users` y `GET/PUT /api/permissions` exigen Admin (Editor además puede `GET /api/users` en solo lectura). R2 (no cambiar el propio rol) y "no autoeliminación" quedaron resueltos como casos del mismo endpoint, comparando el id del actor contra el id objetivo. Se retrofitaron los 7 suites de tests previos para actuar como un Admin autenticado (bootstrap + `AuthTestHelpers`), y se agregaron los escenarios SEC que antes estaban deferidos (US-002/003/004/006-SEC, R2).
 **Nota de diseño:** "el último Admin no se puede eliminar/degradar" y "un Admin no puede autoeliminarse/auto-degradarse" colapsan en el mismo caso cuando solo queda un Admin (es el único que podría autorizar la acción sobre sí mismo); ambas reglas se mantienen (defensa en profundidad) pero se verifican con el mismo código de estado.
 
-## Iteración 11 — Registro de auditoría (US-001-AUD)
+## Iteración 11 — Registro de auditoría (US-001-AUD) ✅
 
 **Entregable:** audit trail que registra toda acción (actor, acción, entidad, fecha), append-only/inmutable, que sobrevive al soft-delete.
 **Done-when:** los escenarios de `features/US-001-AUD.feature` pasan (registro por acción, inmutabilidad, persistencia tras soft-delete).
+**Estado:** ✅ Cumplida. `dotnet test` → **67/67 verde** (3 escenarios nuevos + los 64 previos). El registro se llena solo: un `IEndpointFilter` (`AuditLogFilter`) aplicado una vez a todo el grupo `/api` anota actor (`X-User-Id`), acción (el nombre ya declarado con `.WithName` en cada endpoint) y entidad (segmento de la URL) en cada request — sin instrumentar cada servicio de aplicación por separado. `IAuditLogRepository` solo declara `Append`/`GetAll` (append-only por contrato, sin Update/Delete); no hay ninguna ruta de edición/borrado expuesta. Sin FK hacia `User`, así que una entrada sobrevive al soft-delete de la cuenta involucrada. `GET /api/audit-log` (solo Admin) expone el log.
 
 ## Iteración 12 — Observabilidad y alertas (US-001-MON)
 

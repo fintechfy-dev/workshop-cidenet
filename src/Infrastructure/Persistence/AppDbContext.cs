@@ -1,3 +1,4 @@
+using Domain.Audit;
 using Domain.Permissions;
 using Domain.Users;
 using Microsoft.EntityFrameworkCore;
@@ -15,6 +16,7 @@ public class AppDbContext : DbContext
 
     public DbSet<User> Users => Set<User>();
     public DbSet<Permission> Permissions => Set<Permission>();
+    public DbSet<AuditLogEntry> AuditLogEntries => Set<AuditLogEntry>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -44,6 +46,15 @@ public class AppDbContext : DbContext
             entity.Property(p => p.Resource).HasConversion<string>().IsRequired();
             entity.Property(p => p.Action).HasConversion<string>().IsRequired();
             entity.HasIndex(p => new { p.Role, p.Resource, p.Action }).IsUnique();
+        });
+
+        modelBuilder.Entity<AuditLogEntry>(entity =>
+        {
+            entity.HasKey(e => e.Id);
+            entity.Property(e => e.Action).IsRequired();
+            entity.Property(e => e.EntityType).IsRequired();
+            // Sin FK hacia User: así una entrada sobrevive aunque la cuenta se
+            // elimine lógicamente (o si el actor mismo fue eliminado) — US-001-AUD.
         });
     }
 }
