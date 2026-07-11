@@ -45,10 +45,12 @@
 **Estado:** ✅ Cumplida. `dotnet test` → **39/39 verde** (6 escenarios nuevos + los 33 previos). `User.SoftDelete()`/`Reactivate()` como invariantes de dominio; filtro global de EF (`HasQueryFilter(!IsDeleted)`) excluye eliminados de listado/edición/segunda-eliminación sin tocar cada repositorio; `IgnoreQueryFilters()` solo para auditoría y para detectar reactivación por email. Desbloqueó dos escenarios deferidos: US-002-AUD (tabla no muestra eliminados) y US-001-EDGE5 (recrear email reactiva la cuenta).
 **Deferidos:** "no autoeliminación" (US-004-V3) y "solo Admin elimina" (US-004-SEC) requieren la identidad del actor autenticado (It 9–10); advertencia del modal para Admin → frontend (It 16).
 
-## Iteración 7 — Editar el propio perfil (US-005)
+## Iteración 7 — Editar el propio perfil (US-005) ✅
 
 **Entregable:** `GET/PUT /api/users/me`; alcance **self**; rol/estado solo lectura (R2/R3); cambio de contraseña con confirmación y verificación de la actual; email único.
 **Done-when:** los escenarios de `features/US-005.feature` pasan (incluye 403 al editar a otro, no expone contraseña).
+**Estado:** ✅ Cumplida. `dotnet test` → **45/45 verde** (6 escenarios nuevos + los 39 previos). Alcance self resuelto con un marcador provisional de identidad (header `X-User-Id`, reemplazable por sesión real en It 9–10); rol/estado quedan de solo lectura simplemente porque `EditMyProfileRequest` no los declara en el contrato (R2/R3); cambio de contraseña verifica la actual con `IPasswordHasher.Verify` (bcrypt) antes de aplicar la nueva.
+**Deferido:** "No puedo editar el perfil de otro usuario" vía `PUT /api/users/{id}` directo (autorización por rol) requiere identidad real de sesión (It 9–10), mismo caso que US-003-SEC.
 
 ## Iteración 8 — Matriz de permisos (US-006)
 

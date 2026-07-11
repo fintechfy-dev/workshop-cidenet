@@ -87,6 +87,13 @@ public class User : Entity
         Touch();
     }
 
+    /// <summary>Cambia solo la contraseña (US-005), tras verificar la actual en el servicio de aplicación.</summary>
+    public void ChangePassword(string passwordHash)
+    {
+        PasswordHash = passwordHash;
+        Touch();
+    }
+
     /// <summary>Borrado lógico (US-004-AUD): el registro nunca se borra físicamente.</summary>
     public void SoftDelete()
     {

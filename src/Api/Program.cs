@@ -35,6 +35,7 @@ builder.Services.AddScoped<CreateUserService>();
 builder.Services.AddScoped<ListUsersService>();
 builder.Services.AddScoped<EditUserService>();
 builder.Services.AddScoped<DeleteUserService>();
+builder.Services.AddScoped<EditMyProfileService>();
 
 var app = builder.Build();
 
@@ -108,6 +109,43 @@ app.MapDelete("/api/users/{id:guid}", async (Guid id, DeleteUserService service)
 })
 .WithName("DeleteUser");
 
+app.MapGet("/api/users/me", async (HttpRequest request, IUserRepository users) =>
+{
+    if (!TryGetActorId(request, out var actorId))
+    {
+        return Results.Unauthorized();
+    }
+
+    var actor = await users.GetByIdAsync(actorId);
+    if (actor is null)
+    {
+        return Results.Unauthorized();
+    }
+
+    return Results.Ok(new UserDto(actor.Id, actor.Name, actor.Email, actor.Role.ToString(), actor.Status.ToString()));
+})
+.WithName("GetMyProfile");
+
+app.MapPut("/api/users/me", async (HttpRequest request, EditMyProfileRequest body, EditMyProfileService service) =>
+{
+    if (!TryGetActorId(request, out var actorId))
+    {
+        return Results.Unauthorized();
+    }
+
+    var result = await service.EditAsync(new EditMyProfileCommand(
+        actorId, body.Nombre, body.Email, body.CurrentPassword, body.NewPassword, body.ConfirmNewPassword));
+
+    return result.Outcome switch
+    {
+        EditMyProfileOutcome.Updated => Results.Ok(result.User),
+        EditMyProfileOutcome.Conflict => Results.Conflict(new { error = result.Error }),
+        EditMyProfileOutcome.Unauthorized => Results.Unauthorized(),
+        _ => Results.BadRequest(new { error = result.Error })
+    };
+})
+.WithName("EditMyProfile");
+
 // El AppDbContext queda registrado y listo. Cuando definas tu dominio y tu
 // primera migración, aplícala al arrancar (ej.):
 //   if (!app.Environment.IsEnvironment("Testing"))
@@ -118,6 +156,15 @@ app.MapDelete("/api/users/{id:guid}", async (Guid id, DeleteUserService service)
 //   }
 
 app.Run();
+
+// Marcador provisional de identidad (X-User-Id) hasta que la autenticación real
+// (It 9–10) resuelva el actor desde la sesión en vez de un header explícito.
+static bool TryGetActorId(HttpRequest request, out Guid actorId)
+{
+    actorId = Guid.Empty;
+    return request.Headers.TryGetValue("X-User-Id", out var raw)
+        && Guid.TryParse(raw, out actorId);
+}
 
 public partial class Program
 {
