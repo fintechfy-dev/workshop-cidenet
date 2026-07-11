@@ -1,5 +1,6 @@
 using System;
 using System.Net;
+using System.Net.Http;
 using System.Net.Http.Json;
 using System.Text.Json;
 using System.Threading.Tasks;
@@ -26,6 +27,14 @@ public class CrearUsuarioTests : IClassFixture<CrearUsuarioFactory>
 
     private static string UniqueEmail() => $"u{Guid.NewGuid():N}@cidenet.com";
 
+    /// <summary>Cliente autenticado como el Admin de arranque (ver <see cref="CrearUsuarioFactory"/>).</summary>
+    private HttpClient CreateAuthenticatedClient()
+    {
+        var httpClient = _factory.CreateClient();
+        httpClient.DefaultRequestHeaders.Add("X-User-Id", _factory.AdminId.ToString());
+        return httpClient;
+    }
+
     private static object CrearRequest(
         string? nombre = "Ana Gomez",
         string? email = null,
@@ -47,7 +56,7 @@ public class CrearUsuarioTests : IClassFixture<CrearUsuarioFactory>
     [Fact]
     public async Task Crear_cuenta_con_datos_validos_queda_activa_y_sin_exponer_password()
     {
-        var client = _factory.CreateClient();
+        var client = CreateAuthenticatedClient();
 
         var response = await client.PostAsJsonAsync("/api/users", CrearRequest(email: UniqueEmail()));
 
@@ -62,7 +71,7 @@ public class CrearUsuarioTests : IClassFixture<CrearUsuarioFactory>
     [Fact]
     public async Task Rechazar_cuando_un_campo_obligatorio_esta_vacio()
     {
-        var client = _factory.CreateClient();
+        var client = CreateAuthenticatedClient();
 
         var response = await client.PostAsJsonAsync(
             "/api/users", CrearRequest(nombre: "", email: UniqueEmail()));
@@ -74,7 +83,7 @@ public class CrearUsuarioTests : IClassFixture<CrearUsuarioFactory>
     [Fact]
     public async Task Rechazar_email_con_formato_invalido()
     {
-        var client = _factory.CreateClient();
+        var client = CreateAuthenticatedClient();
 
         var response = await client.PostAsJsonAsync(
             "/api/users", CrearRequest(email: "ana(arroba)cidenet"));
@@ -86,7 +95,7 @@ public class CrearUsuarioTests : IClassFixture<CrearUsuarioFactory>
     [Fact]
     public async Task Rechazar_email_duplicado()
     {
-        var client = _factory.CreateClient();
+        var client = CreateAuthenticatedClient();
         var email = UniqueEmail();
 
         await client.PostAsJsonAsync("/api/users", CrearRequest(email: email));
@@ -104,7 +113,7 @@ public class CrearUsuarioTests : IClassFixture<CrearUsuarioFactory>
     [InlineData("Ab1x", false)]      // menos de 8 caracteres
     public async Task Validar_politica_de_password(string password, bool aceptada)
     {
-        var client = _factory.CreateClient();
+        var client = CreateAuthenticatedClient();
 
         var response = await client.PostAsJsonAsync(
             "/api/users", CrearRequest(email: UniqueEmail(), password: password));
@@ -123,7 +132,7 @@ public class CrearUsuarioTests : IClassFixture<CrearUsuarioFactory>
     [Fact]
     public async Task Rechazar_cuando_password_y_confirmacion_no_coinciden()
     {
-        var client = _factory.CreateClient();
+        var client = CreateAuthenticatedClient();
 
         var response = await client.PostAsJsonAsync(
             "/api/users",
@@ -136,7 +145,7 @@ public class CrearUsuarioTests : IClassFixture<CrearUsuarioFactory>
     [Fact]
     public async Task Rechazar_cuando_el_rol_no_es_valido()
     {
-        var client = _factory.CreateClient();
+        var client = CreateAuthenticatedClient();
 
         var response = await client.PostAsJsonAsync(
             "/api/users", CrearRequest(email: UniqueEmail(), rol: "SuperUser"));
@@ -148,7 +157,7 @@ public class CrearUsuarioTests : IClassFixture<CrearUsuarioFactory>
     [Fact]
     public async Task Email_es_case_insensitive_para_la_unicidad()
     {
-        var client = _factory.CreateClient();
+        var client = CreateAuthenticatedClient();
         var localPart = $"u{Guid.NewGuid():N}";
 
         await client.PostAsJsonAsync("/api/users", CrearRequest(email: $"{localPart}@cidenet.com"));
@@ -162,7 +171,7 @@ public class CrearUsuarioTests : IClassFixture<CrearUsuarioFactory>
     [Fact]
     public async Task Se_recortan_los_espacios_del_nombre_y_del_email()
     {
-        var client = _factory.CreateClient();
+        var client = CreateAuthenticatedClient();
         var localPart = $"u{Guid.NewGuid():N}";
 
         var response = await client.PostAsJsonAsync(
@@ -182,7 +191,7 @@ public class CrearUsuarioTests : IClassFixture<CrearUsuarioFactory>
     [InlineData(101, false)]   // más del máximo (100)
     public async Task Validar_limite_de_longitud_del_nombre(int longitud, bool aceptada)
     {
-        var client = _factory.CreateClient();
+        var client = CreateAuthenticatedClient();
         var nombre = new string('a', longitud);
 
         var response = await client.PostAsJsonAsync(
@@ -202,7 +211,7 @@ public class CrearUsuarioTests : IClassFixture<CrearUsuarioFactory>
     [Fact]
     public async Task Recrear_email_de_cuenta_eliminada_reactiva_la_cuenta_en_vez_de_duplicarla()
     {
-        var client = _factory.CreateClient();
+        var client = CreateAuthenticatedClient();
         var email = UniqueEmail();
 
         var creada = await client.PostAsJsonAsync("/api/users", CrearRequest(email: email));

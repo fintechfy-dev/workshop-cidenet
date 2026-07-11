@@ -8,6 +8,13 @@ public interface IUserRepository
     /// <summary>¿Existe ya una cuenta con este email normalizado? (unicidad, R4).</summary>
     Task<bool> ExistsByEmailAsync(string normalizedEmail, CancellationToken ct = default);
 
+    /// <summary>
+    /// ¿Existe al menos una cuenta en el sistema? Habilita el arranque: la
+    /// primera cuenta (el Admin semilla) se crea sin exigir autorización porque
+    /// todavía no hay ningún Admin que pueda otorgarla.
+    /// </summary>
+    Task<bool> AnyAsync(CancellationToken ct = default);
+
     Task AddAsync(User user, CancellationToken ct = default);
 
     Task SaveChangesAsync(CancellationToken ct = default);

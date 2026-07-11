@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Net.Http.Json;
@@ -18,23 +19,30 @@ namespace Api.Tests.ConsultarUsuarios;
 /// Cada test crea su propia factory (BD InMemory aislada) para que los conteos
 /// de paginación y totales no se contaminen entre escenarios.
 ///
-/// Deferidos (dependen de otras iteraciones):
-///  - "Editor solo lectura / Viewer sin acceso" (US-002-SEC): requiere auth (It 9–10).
+/// Desde It10, los tests actúan como el Admin de arranque por defecto (ver
+/// <see cref="AuthTestHelpers"/>); "Editor solo lectura / Viewer sin acceso"
+/// ya no está deferido, se cubre abajo con clientes autenticados como cada rol.
 /// </summary>
-public class ConsultarUsuariosTests : IDisposable
+public class ConsultarUsuariosTests : IAsyncLifetime
 {
     private readonly InMemoryApiFactory _factory = new();
-    private readonly HttpClient _client;
+    private HttpClient _client = null!;
 
     private static readonly JsonSerializerOptions JsonOptions =
         new() { PropertyNameCaseInsensitive = true };
 
-    public ConsultarUsuariosTests() => _client = _factory.CreateClient();
+    public async Task InitializeAsync()
+    {
+        _client = _factory.CreateClient();
+        var adminId = await _client.BootstrapAdminAsync();
+        _client.AuthenticateAs(adminId);
+    }
 
-    public void Dispose()
+    public Task DisposeAsync()
     {
         _client.Dispose();
         _factory.Dispose();
+        return Task.CompletedTask;
     }
 
     private sealed record UserRow(Guid Id, string? Nombre, string? Email, string? Rol, string? Estado);
@@ -56,6 +64,23 @@ public class ConsultarUsuariosTests : IDisposable
         response.EnsureSuccessStatusCode();
     }
 
+    private async Task<Guid> SeedUserAndGetIdAsync(
+        string nombre, string email, string rol = "Editor", string estado = "Activo")
+    {
+        var response = await _client.PostAsJsonAsync("/api/users", new
+        {
+            nombre,
+            email,
+            password = "Abcdef1x",
+            confirmPassword = "Abcdef1x",
+            rol,
+            estado
+        });
+        response.EnsureSuccessStatusCode();
+        var dto = await response.Content.ReadFromJsonAsync<JsonElement>();
+        return dto.GetProperty("id").GetGuid();
+    }
+
     private async Task<PagedUsers> GetUsersAsync(string query)
     {
         var response = await _client.GetAsync("/api/users" + query);
@@ -73,7 +98,8 @@ public class ConsultarUsuariosTests : IDisposable
 
         var page = await GetUsersAsync("");
 
-        var row = Assert.Single(page.Items);
+        // El Admin de arranque (It10) también aparece en la tabla; busca la fila de Ana.
+        var row = page.Items.Single(u => u.Email == "ana@cidenet.com");
         Assert.False(string.IsNullOrWhiteSpace(row.Nombre));
         Assert.False(string.IsNullOrWhiteSpace(row.Email));
         Assert.False(string.IsNullOrWhiteSpace(row.Rol));
@@ -89,13 +115,14 @@ public class ConsultarUsuariosTests : IDisposable
             await SeedUserAsync($"Usuario {i}", $"user{i}@cidenet.com");
         }
 
+        // 12 creados + el Admin de arranque (It10) = 13.
         var page1 = await GetUsersAsync("?page=1");
-        Assert.Equal(12, page1.Total);
+        Assert.Equal(13, page1.Total);
         Assert.Equal(10, page1.Items.Count);
 
         var page2 = await GetUsersAsync("?page=2");
-        Assert.Equal(12, page2.Total);
-        Assert.Equal(2, page2.Items.Count);
+        Assert.Equal(13, page2.Total);
+        Assert.Equal(3, page2.Items.Count);
     }
 
     // Scenario Outline: Buscar por nombre o email de forma parcial y case-insensitive
@@ -202,5 +229,21 @@ public class ConsultarUsuariosTests : IDisposable
         Assert.DoesNotContain("Abcdef1x", body);
         Assert.DoesNotContain("password", body, StringComparison.OrdinalIgnoreCase);
         Assert.DoesNotContain("passwordHash", body, StringComparison.OrdinalIgnoreCase);
+    }
+
+    // Scenario (US-002-SEC): El Editor ve la tabla en solo lectura, el Viewer no accede
+    [Fact]
+    public async Task Editor_puede_ver_la_tabla_pero_viewer_no_tiene_acceso()
+    {
+        var editorId = await SeedUserAndGetIdAsync("Eddie Editor", "eddie@cidenet.com", "Editor");
+        var viewerId = await SeedUserAndGetIdAsync("Vera Viewer", "vera@cidenet.com", "Viewer");
+
+        using var editorClient = _factory.CreateClient();
+        editorClient.AuthenticateAs(editorId);
+        Assert.Equal(HttpStatusCode.OK, (await editorClient.GetAsync("/api/users")).StatusCode);
+
+        using var viewerClient = _factory.CreateClient();
+        viewerClient.AuthenticateAs(viewerId);
+        Assert.Equal(HttpStatusCode.Forbidden, (await viewerClient.GetAsync("/api/users")).StatusCode);
     }
 }

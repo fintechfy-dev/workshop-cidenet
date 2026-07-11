@@ -13,8 +13,7 @@ namespace Api.Tests.MatrizPermisos;
 
 /// <summary>
 /// Tests de aceptación de US-006 · Matriz de permisos, derivados de
-/// features/US-006.feature. Generados con /test ANTES de implementar
-/// GET/PUT /api/permissions (deben fallar en rojo).
+/// features/US-006.feature.
 ///
 /// R3 ("un Admin no puede asignarse permisos a sí mismo") y el anti-lockout
 /// (US-006-SEC-ERR1, "no dejar a Admin sin sus permisos esenciales") se
@@ -23,25 +22,33 @@ namespace Api.Tests.MatrizPermisos;
 /// él mismo posee" es siempre Admin). Cualquier intento de tocar esa fila,
 /// en cualquier dirección, se rechaza — cubre ambos escenarios a la vez.
 ///
-/// Deferidos (dependen de otras iteraciones):
-///  - "Un cambio se refleja en la autorización efectiva" (que otros endpoints
-///    respeten la matriz): transversal, se cierra en It 10.
-///  - "Solo Admin accede a la matriz" (US-006-SEC): requiere autenticación (It 9–10).
+/// Desde It10, el Admin de arranque (<see cref="AuthTestHelpers"/>) es el
+/// actor por defecto; "Solo Admin accede a la matriz" (US-006-SEC) ya no está
+/// deferido.
+///
+/// Deferido: "Un cambio se refleja en la autorización efectiva" (que otros
+/// endpoints respeten la matriz) es transversal, fuera de alcance de US-006.
 /// </summary>
-public class MatrizPermisosTests : IDisposable
+public class MatrizPermisosTests : IAsyncLifetime
 {
     private readonly InMemoryApiFactory _factory = new();
-    private readonly HttpClient _client;
+    private HttpClient _client = null!;
 
     private static readonly JsonSerializerOptions JsonOptions =
         new() { PropertyNameCaseInsensitive = true };
 
-    public MatrizPermisosTests() => _client = _factory.CreateClient();
+    public async Task InitializeAsync()
+    {
+        _client = _factory.CreateClient();
+        var adminId = await _client.BootstrapAdminAsync();
+        _client.AuthenticateAs(adminId);
+    }
 
-    public void Dispose()
+    public Task DisposeAsync()
     {
         _client.Dispose();
         _factory.Dispose();
+        return Task.CompletedTask;
     }
 
     private sealed record PermissionCell(string Rol, string Recurso, string Accion, bool Permitido);
@@ -57,6 +64,22 @@ public class MatrizPermisosTests : IDisposable
 
     private Task<HttpResponseMessage> PutMatrixAsync(params object[] cambios) =>
         _client.PutAsJsonAsync("/api/permissions", new { cambios });
+
+    private async Task<Guid> CrearEditorAsync()
+    {
+        var response = await _client.PostAsJsonAsync("/api/users", new
+        {
+            nombre = "Eddie Editor",
+            email = "eddie@cidenet.com",
+            password = "Abcdef1x",
+            confirmPassword = "Abcdef1x",
+            rol = "Editor",
+            estado = "Activo"
+        });
+        response.EnsureSuccessStatusCode();
+        var dto = await response.Content.ReadFromJsonAsync<JsonElement>();
+        return dto.GetProperty("id").GetGuid();
+    }
 
     // Scenario: Ver la matriz de permisos con su estado actual
     [Fact]
@@ -120,5 +143,20 @@ public class MatrizPermisosTests : IDisposable
         var response = await PutMatrixAsync(new { rol = "Admin", recurso = "Permissions", accion = "Update", permitido = false });
 
         Assert.Equal(HttpStatusCode.Conflict, response.StatusCode);
+    }
+
+    // Scenario (US-006-SEC): Solo Admin accede a la matriz de permisos
+    [Fact]
+    public async Task Editor_no_puede_acceder_a_la_matriz_de_permisos()
+    {
+        var editorId = await CrearEditorAsync();
+        var editorClient = _factory.CreateClient();
+        editorClient.AuthenticateAs(editorId);
+
+        var getResponse = await editorClient.GetAsync("/api/permissions");
+        Assert.Equal(HttpStatusCode.Forbidden, getResponse.StatusCode);
+
+        var putResponse = await editorClient.PutAsJsonAsync("/api/permissions", new { cambios = Array.Empty<object>() });
+        Assert.Equal(HttpStatusCode.Forbidden, putResponse.StatusCode);
     }
 }

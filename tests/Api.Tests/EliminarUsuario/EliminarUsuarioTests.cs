@@ -14,35 +14,41 @@ namespace Api.Tests.EliminarUsuario;
 
 /// <summary>
 /// Tests de aceptación de US-004 · Eliminar cuenta de usuario, derivados de
-/// features/US-004.feature. Generados con /test ANTES de implementar
-/// DELETE /api/users/{id} (deben fallar en rojo).
+/// features/US-004.feature.
 ///
-/// Contrato asumido para el endpoint (a implementar en /iterate):
-///  - 204 No Content al eliminar con éxito (soft-delete).
-///  - 404 Not Found si el usuario no existe o ya fue eliminado (idempotencia,
-///    "informa que ya no existe, sin fallar").
-///  - 409 Conflict si es el último Admin (R1), con { error }.
+/// Contrato del endpoint: 204 éxito, 404 no existe/ya eliminado, 409 último Admin
+/// o autoeliminación, 403 si el actor no es Admin.
 ///
-/// Deferidos (dependen de otras iteraciones):
-///  - US-004 escenario "Un Admin no puede eliminar su propia cuenta": requiere
-///    la identidad del actor autenticado (It 9–10), igual que R2 en Editar (It5).
-///  - US-004-SEC "Solo Admin puede eliminar cuentas": requiere autenticación (It 9–10).
-///  - "El modal advierte cuando el usuario a eliminar es Admin": frontend (It 16).
+/// Desde It10, el Admin de arranque (ver <see cref="AuthTestHelpers"/>) es el
+/// actor por defecto. "No autoeliminación" y "solo Admin elimina" ya no están
+/// deferidos. Nota: bloquear la eliminación del último Admin y bloquear la
+/// autoeliminación colapsan en el mismo caso cuando solo existe un Admin (es
+/// el único que podría autorizar su propia eliminación), así que ambas reglas
+/// se verifican con 409 sin distinguir cuál disparó primero.
+///
+/// Deferido: la advertencia del modal para Admin es frontend (It 16).
 /// </summary>
-public class EliminarUsuarioTests : IDisposable
+public class EliminarUsuarioTests : IAsyncLifetime
 {
     private readonly InMemoryApiFactory _factory = new();
-    private readonly HttpClient _client;
+    private HttpClient _client = null!;
+    private Guid _bootstrapAdminId;
 
     private static readonly JsonSerializerOptions JsonOptions =
         new() { PropertyNameCaseInsensitive = true };
 
-    public EliminarUsuarioTests() => _client = _factory.CreateClient();
+    public async Task InitializeAsync()
+    {
+        _client = _factory.CreateClient();
+        _bootstrapAdminId = await _client.BootstrapAdminAsync();
+        _client.AuthenticateAs(_bootstrapAdminId);
+    }
 
-    public void Dispose()
+    public Task DisposeAsync()
     {
         _client.Dispose();
         _factory.Dispose();
+        return Task.CompletedTask;
     }
 
     private sealed record UserDto(Guid Id, string? Nombre, string? Email, string? Rol, string? Estado);
@@ -65,6 +71,13 @@ public class EliminarUsuarioTests : IDisposable
         return dto!;
     }
 
+    private HttpClient ClienteComo(Guid actorId)
+    {
+        var client = _factory.CreateClient();
+        client.AuthenticateAs(actorId);
+        return client;
+    }
+
     private Task<HttpResponseMessage> EliminarAsync(Guid id) =>
         _client.DeleteAsync($"/api/users/{id}");
 
@@ -73,7 +86,6 @@ public class EliminarUsuarioTests : IDisposable
     [Fact]
     public async Task Eliminar_una_cuenta_la_marca_eliminada_y_desaparece_de_la_tabla()
     {
-        await CrearAsync("Admin Uno", "admin1@cidenet.com", "Admin", "Activo");
         var objetivo = await CrearAsync("Ana Gomez", "ana@cidenet.com", "Editor", "Activo");
 
         var response = await EliminarAsync(objetivo.Id);
@@ -86,24 +98,31 @@ public class EliminarUsuarioTests : IDisposable
             u => u.GetProperty("id").GetGuid() == objetivo.Id);
     }
 
-    // Scenario: No se puede eliminar el último Admin (R1)
+    // Scenario: No se puede eliminar el último Admin (R1) — con un único Admin,
+    // solo él podría autorizar su propia eliminación, así que coincide con autoeliminación.
     [Fact]
     public async Task No_se_puede_eliminar_el_ultimo_admin()
     {
-        var admin = await CrearAsync("Admin Unico", "admin@cidenet.com", "Admin", "Activo");
-
-        var response = await EliminarAsync(admin.Id);
+        var response = await EliminarAsync(_bootstrapAdminId);
 
         Assert.Equal(HttpStatusCode.Conflict, response.StatusCode);
-        var body = await response.Content.ReadFromJsonAsync<JsonElement>();
-        Assert.Contains("último administrador", body.GetProperty("error").GetString());
+    }
+
+    // Scenario: Un Admin no puede eliminar su propia cuenta, aunque no sea el último
+    [Fact]
+    public async Task Un_admin_no_puede_eliminar_su_propia_cuenta()
+    {
+        await CrearAsync("Segundo Admin", "segundo@cidenet.com", "Admin"); // ahora hay 2 admins
+
+        var response = await EliminarAsync(_bootstrapAdminId);
+
+        Assert.Equal(HttpStatusCode.Conflict, response.StatusCode);
     }
 
     // Scenario: Eliminar una cuenta que ya fue eliminada en paralelo
     [Fact]
     public async Task Eliminar_una_cuenta_ya_eliminada_informa_que_no_existe_sin_fallar()
     {
-        await CrearAsync("Admin Uno", "admin1@cidenet.com", "Admin", "Activo");
         var objetivo = await CrearAsync("Ana Gomez", "ana@cidenet.com", "Editor", "Activo");
         await EliminarAsync(objetivo.Id); // otro Admin ya la eliminó
 
@@ -125,7 +144,6 @@ public class EliminarUsuarioTests : IDisposable
     [Fact]
     public async Task Eliminacion_es_logica_y_conserva_el_registro_fisico()
     {
-        await CrearAsync("Admin Uno", "admin1@cidenet.com", "Admin", "Activo");
         var objetivo = await CrearAsync("Ana Gomez", "ana@cidenet.com", "Editor", "Activo");
 
         await EliminarAsync(objetivo.Id);
@@ -136,5 +154,18 @@ public class EliminarUsuarioTests : IDisposable
             .FirstOrDefaultAsync(u => u.Id == objetivo.Id);
 
         Assert.NotNull(registro); // el registro sigue físicamente en la base
+    }
+
+    // Scenario (US-004-SEC): Solo Admin puede eliminar cuentas
+    [Fact]
+    public async Task Editor_no_puede_eliminar_cuentas()
+    {
+        var editor = await CrearAsync("Eddie Editor", "eddie@cidenet.com", "Editor");
+        var objetivo = await CrearAsync("Objetivo", "objetivo@cidenet.com");
+        var editorClient = ClienteComo(editor.Id);
+
+        var response = await editorClient.DeleteAsync($"/api/users/{objetivo.Id}");
+
+        Assert.Equal(HttpStatusCode.Forbidden, response.StatusCode);
     }
 }

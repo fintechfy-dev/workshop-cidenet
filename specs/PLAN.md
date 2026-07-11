@@ -66,10 +66,12 @@
 **Estado:** ✅ Cumplida. `dotnet test` → **58/58 verde** (8 escenarios nuevos + los 50 previos). Login verifica contra el hash (bcrypt) y devuelve el mismo `UserDto` sin contraseña que ya usa el resto de la API — su `Id` es lo que el cliente reusa como `X-User-Id` (el marcador de identidad de It 7–8), que ahora queda respaldado por credenciales reales en vez de ser un placeholder. La "invalidación inmediata de sesión" (US-007-USR) sale gratis: como no hay sesión cacheada, `GET/PUT /api/users/me` revalidan `Estado=Activo` en cada request, así que desactivar corta el acceso en la siguiente llamada sin mecanismo aparte.
 **Deferido:** rate limiting / bloqueo por fuerza bruta (US-007-EDGE2) queda fuera del MVP, según lo confirmado en Completitud.
 
-## Iteración 10 — Endurecimiento de seguridad transversal (US-001-SEC)
+## Iteración 10 — Endurecimiento de seguridad transversal (US-001-SEC) ✅
 
 **Entregable:** consolidar la matriz de autorización backend (403 para peticiones directas no autorizadas en todos los endpoints) y garantizar que ningún DTO expone la contraseña.
 **Done-when:** los escenarios de `features/US-001-SEC.feature` pasan (Scenario Outline de autorización + no exponer contraseña + hashing).
+**Estado:** ✅ Cumplida. `dotnet test` → **64/64 verde** (6 escenarios nuevos + los 58 previos). Autorización real por rol en todos los endpoints de usuarios y permisos vía un helper `AuthorizeAsync` (resuelve el actor por `X-User-Id`, verifica `Estado=Activo` y el rol permitido). Arranque: la primera cuenta del sistema se crea sin exigir autorización (todavía no hay Admin que la otorgue); de ahí en adelante, `POST/PUT/DELETE /api/users` y `GET/PUT /api/permissions` exigen Admin (Editor además puede `GET /api/users` en solo lectura). R2 (no cambiar el propio rol) y "no autoeliminación" quedaron resueltos como casos del mismo endpoint, comparando el id del actor contra el id objetivo. Se retrofitaron los 7 suites de tests previos para actuar como un Admin autenticado (bootstrap + `AuthTestHelpers`), y se agregaron los escenarios SEC que antes estaban deferidos (US-002/003/004/006-SEC, R2).
+**Nota de diseño:** "el último Admin no se puede eliminar/degradar" y "un Admin no puede autoeliminarse/auto-degradarse" colapsan en el mismo caso cuando solo queda un Admin (es el único que podría autorizar la acción sobre sí mismo); ambas reglas se mantienen (defensa en profundidad) pero se verifican con el mismo código de estado.
 
 ## Iteración 11 — Registro de auditoría (US-001-AUD)
 

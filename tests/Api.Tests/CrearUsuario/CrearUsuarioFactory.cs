@@ -1,9 +1,13 @@
+using System;
 using System.Linq;
+using System.Threading.Tasks;
+using Api.Tests.Support;
 using Infrastructure.Persistence;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
+using Xunit;
 
 namespace Api.Tests.CrearUsuario;
 
@@ -12,12 +16,20 @@ namespace Api.Tests.CrearUsuario;
 /// cableado a Postgres por un proveedor EF InMemory, aislado por instancia,
 /// para que los tests corran sin una base real (decisión de harness: EF InMemory).
 ///
+/// Desde It10 (autorización transversal), siembra un Admin de arranque una
+/// sola vez para toda la clase (la BD es compartida vía IClassFixture): la
+/// primera cuenta del sistema se crea sin exigir autorización porque todavía
+/// no hay ningún Admin que la otorgue; de ahí en adelante, los tests actúan
+/// como ese Admin (ver <see cref="AdminId"/>).
+///
 /// Nota: EF InMemory no valida el índice único case-insensitive ni la concurrencia
 /// como Postgres; esas reglas se verifican a nivel de lógica de aplicación.
 /// </summary>
-public class CrearUsuarioFactory : WebApplicationFactory<Program>
+public class CrearUsuarioFactory : WebApplicationFactory<Program>, IAsyncLifetime
 {
     private readonly string _dbName = "crear-usuario-" + System.Guid.NewGuid();
+
+    public Guid AdminId { get; private set; }
 
     protected override void ConfigureWebHost(IWebHostBuilder builder)
     {
@@ -36,4 +48,12 @@ public class CrearUsuarioFactory : WebApplicationFactory<Program>
                 options.UseInMemoryDatabase(_dbName));
         });
     }
+
+    async Task IAsyncLifetime.InitializeAsync()
+    {
+        using var client = CreateClient();
+        AdminId = await client.BootstrapAdminAsync();
+    }
+
+    Task IAsyncLifetime.DisposeAsync() => Task.CompletedTask;
 }

@@ -11,30 +11,37 @@ namespace Api.Tests.EditarUsuario;
 
 /// <summary>
 /// Tests de aceptación de US-003 · Editar cuenta de usuario, derivados de
-/// features/US-003.feature. Generados con /test ANTES de implementar PUT /api/users/{id}.
+/// features/US-003.feature.
 ///
 /// Cada test usa su propia BD InMemory (la regla del "último Admin" cuenta admins
-/// en toda la base, así que el aislamiento es necesario).
+/// en toda la base, así que el aislamiento es necesario). Desde It10, el Admin de
+/// arranque (ver <see cref="AuthTestHelpers"/>) es el actor por defecto; R2 y
+/// US-003-SEC ya no están deferidos, se cubren abajo con clientes autenticados
+/// como cada actor.
 ///
-/// Deferidos (dependen de otras iteraciones):
-///  - R2 "no puede modificar su propio rol" y US-003-SEC "solo Admin edita a otros":
-///    requieren la identidad del actor autenticado (It 9–10).
-///  - "botón Guardar deshabilitado": frontend (It 14).
+/// Deferido: "botón Guardar deshabilitado" es de frontend (It 14).
 /// </summary>
-public class EditarUsuarioTests : IDisposable
+public class EditarUsuarioTests : IAsyncLifetime
 {
     private readonly InMemoryApiFactory _factory = new();
-    private readonly HttpClient _client;
+    private HttpClient _client = null!;
+    private Guid _bootstrapAdminId;
 
     private static readonly JsonSerializerOptions JsonOptions =
         new() { PropertyNameCaseInsensitive = true };
 
-    public EditarUsuarioTests() => _client = _factory.CreateClient();
+    public async Task InitializeAsync()
+    {
+        _client = _factory.CreateClient();
+        _bootstrapAdminId = await _client.BootstrapAdminAsync();
+        _client.AuthenticateAs(_bootstrapAdminId);
+    }
 
-    public void Dispose()
+    public Task DisposeAsync()
     {
         _client.Dispose();
         _factory.Dispose();
+        return Task.CompletedTask;
     }
 
     private sealed record UserDto(Guid Id, string? Nombre, string? Email, string? Rol, string? Estado);
@@ -57,9 +64,20 @@ public class EditarUsuarioTests : IDisposable
         return dto!;
     }
 
+    private HttpClient ClienteComo(Guid actorId)
+    {
+        var client = _factory.CreateClient();
+        client.AuthenticateAs(actorId);
+        return client;
+    }
+
+    private static Task<HttpResponseMessage> EditarComoAsync(
+        HttpClient client, Guid id, string nombre, string email, string rol, string estado) =>
+        client.PutAsJsonAsync($"/api/users/{id}", new { nombre, email, rol, estado });
+
     private Task<HttpResponseMessage> EditarAsync(
         Guid id, string nombre, string email, string rol, string estado) =>
-        _client.PutAsJsonAsync($"/api/users/{id}", new { nombre, email, rol, estado });
+        EditarComoAsync(_client, id, nombre, email, rol, estado);
 
     // Scenario: Editar los datos de un usuario con éxito
     [Fact]
@@ -91,9 +109,14 @@ public class EditarUsuarioTests : IDisposable
     [Fact]
     public async Task No_se_puede_quitar_el_rol_admin_al_ultimo_admin()
     {
-        var admin = await CrearAsync("Admin Unico", "admin@cidenet.com", "Admin", "Activo");
+        var adminUnico = await CrearAsync("Admin Unico", "admin@cidenet.com", "Admin", "Activo");
+        var adminUnicoClient = ClienteComo(adminUnico.Id);
 
-        var response = await EditarAsync(admin.Id, "Admin Unico", "admin@cidenet.com", "Editor", "Activo");
+        // Deja a "Admin Unico" como el único Admin del sistema (el de arranque no es el último).
+        await adminUnicoClient.DeleteAsync($"/api/users/{_bootstrapAdminId}");
+
+        var response = await EditarComoAsync(
+            adminUnicoClient, adminUnico.Id, "Admin Unico", "admin@cidenet.com", "Editor", "Activo");
 
         Assert.Equal(HttpStatusCode.Conflict, response.StatusCode);
     }
@@ -116,5 +139,32 @@ public class EditarUsuarioTests : IDisposable
         var response = await EditarAsync(Guid.NewGuid(), "Alguien", "alguien@cidenet.com", "Editor", "Activo");
 
         Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
+    }
+
+    // Scenario (US-003-SEC): Solo Admin edita cuentas de otros; un Editor no puede
+    [Fact]
+    public async Task Editor_no_puede_editar_la_cuenta_de_otro_usuario()
+    {
+        var editor = await CrearAsync("Eddie Editor", "eddie@cidenet.com", "Editor");
+        var objetivo = await CrearAsync("Objetivo", "objetivo@cidenet.com");
+        var editorClient = ClienteComo(editor.Id);
+
+        var response = await EditarComoAsync(
+            editorClient, objetivo.Id, "Cambiado", objetivo.Email!, "Editor", "Activo");
+
+        Assert.Equal(HttpStatusCode.Forbidden, response.StatusCode);
+    }
+
+    // Scenario (R2): un Admin no puede cambiar su propio rol
+    [Fact]
+    public async Task Un_admin_no_puede_cambiar_su_propio_rol()
+    {
+        var segundoAdmin = await CrearAsync("Segundo Admin", "segundo@cidenet.com", "Admin");
+        var segundoAdminClient = ClienteComo(segundoAdmin.Id);
+
+        var response = await EditarComoAsync(
+            segundoAdminClient, segundoAdmin.Id, "Segundo Admin", "segundo@cidenet.com", "Editor", "Activo");
+
+        Assert.Equal(HttpStatusCode.Conflict, response.StatusCode);
     }
 }

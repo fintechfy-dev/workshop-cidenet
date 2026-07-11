@@ -11,32 +11,41 @@ namespace Api.Tests.Autenticacion;
 
 /// <summary>
 /// Tests de aceptación de US-007 · Autenticación y bloqueo de inactivos,
-/// derivados de features/US-007.feature. Generados con /test ANTES de
-/// implementar POST /api/auth/login (deben fallar en rojo).
+/// derivados de features/US-007.feature.
 ///
 /// El login devuelve el mismo UserDto que el resto de la API (sin contraseña);
-/// su Id es lo que el cliente usa después como header X-User-Id (marcador
-/// provisional de identidad de It 7–8) para /api/users/me, etc.
+/// su Id es lo que el cliente usa después como header X-User-Id para
+/// /api/users/me, etc. Crear cuentas de prueba pasa por un Admin autenticado
+/// (<see cref="AuthTestHelpers"/>, It10); las llamadas a /login y /me en sí no
+/// exigen rol específico, así que se envían con un cliente plano.
 ///
-/// Deferido: US-007-USR se resuelve indirectamente — GET/PUT /api/users/me ya
-/// revalidan Estado=Activo en cada request (sin sesión cacheada que revocar),
-/// así que desactivar corta el acceso de inmediato. Cubierto en EditarPerfilTests
-/// se puede extender aquí con un caso explícito.
+/// US-007-USR (desactivar corta el acceso de inmediato) se verifica sobre
+/// GET /api/users/me, que revalida Estado=Activo en cada request.
 /// </summary>
-public class AutenticacionTests : IDisposable
+public class AutenticacionTests : IAsyncLifetime
 {
     private readonly InMemoryApiFactory _factory = new();
-    private readonly HttpClient _client;
+    private HttpClient _client = null!;
+    private HttpClient _adminClient = null!;
 
     private static readonly JsonSerializerOptions JsonOptions =
         new() { PropertyNameCaseInsensitive = true };
 
-    public AutenticacionTests() => _client = _factory.CreateClient();
+    public async Task InitializeAsync()
+    {
+        _adminClient = _factory.CreateClient();
+        var adminId = await _adminClient.BootstrapAdminAsync();
+        _adminClient.AuthenticateAs(adminId);
 
-    public void Dispose()
+        _client = _factory.CreateClient();
+    }
+
+    public Task DisposeAsync()
     {
         _client.Dispose();
+        _adminClient.Dispose();
         _factory.Dispose();
+        return Task.CompletedTask;
     }
 
     private sealed record UserDto(Guid Id, string? Nombre, string? Email, string? Rol, string? Estado);
@@ -44,7 +53,7 @@ public class AutenticacionTests : IDisposable
     private async Task<UserDto> CrearAsync(
         string nombre, string email, string password = "Abcdef1x", string rol = "Editor", string estado = "Activo")
     {
-        var response = await _client.PostAsJsonAsync("/api/users", new
+        var response = await _adminClient.PostAsJsonAsync("/api/users", new
         {
             nombre,
             email,
@@ -61,6 +70,13 @@ public class AutenticacionTests : IDisposable
 
     private Task<HttpResponseMessage> LoginAsync(string? email, string? password) =>
         _client.PostAsJsonAsync("/api/auth/login", new { email, password });
+
+    private Task<HttpResponseMessage> GetMeAsync(Guid actorId)
+    {
+        var request = new HttpRequestMessage(HttpMethod.Get, "/api/users/me");
+        request.Headers.Add("X-User-Id", actorId.ToString());
+        return _client.SendAsync(request);
+    }
 
     // Scenario: Autenticar a un usuario activo con credenciales correctas
     [Fact]
@@ -135,11 +151,9 @@ public class AutenticacionTests : IDisposable
     {
         var yo = await CrearAsync("Ana Gomez", "ana@cidenet.com", "Abcdef1x", estado: "Activo");
 
-        var antes = new HttpRequestMessage(HttpMethod.Get, "/api/users/me");
-        antes.Headers.Add("X-User-Id", yo.Id.ToString());
-        Assert.Equal(HttpStatusCode.OK, (await _client.SendAsync(antes)).StatusCode);
+        Assert.Equal(HttpStatusCode.OK, (await GetMeAsync(yo.Id)).StatusCode);
 
-        await _client.PutAsJsonAsync($"/api/users/{yo.Id}", new
+        await _adminClient.PutAsJsonAsync($"/api/users/{yo.Id}", new
         {
             nombre = yo.Nombre,
             email = yo.Email,
@@ -147,9 +161,7 @@ public class AutenticacionTests : IDisposable
             estado = "Inactivo"
         });
 
-        var despues = new HttpRequestMessage(HttpMethod.Get, "/api/users/me");
-        despues.Headers.Add("X-User-Id", yo.Id.ToString());
-        var response = await _client.SendAsync(despues);
+        var response = await GetMeAsync(yo.Id);
 
         Assert.Equal(HttpStatusCode.Unauthorized, response.StatusCode);
     }

@@ -13,6 +13,9 @@ public sealed class UserRepository : IUserRepository
     public Task<bool> ExistsByEmailAsync(string normalizedEmail, CancellationToken ct = default) =>
         _db.Users.AnyAsync(u => u.Email == normalizedEmail, ct);
 
+    public Task<bool> AnyAsync(CancellationToken ct = default) =>
+        _db.Users.AnyAsync(ct);
+
     public async Task AddAsync(User user, CancellationToken ct = default) =>
         await _db.Users.AddAsync(user, ct);
 

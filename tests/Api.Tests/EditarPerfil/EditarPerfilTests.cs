@@ -11,32 +11,42 @@ namespace Api.Tests.EditarPerfil;
 
 /// <summary>
 /// Tests de aceptación de US-005 · Editar el propio perfil, derivados de
-/// features/US-005.feature. Generados con /test ANTES de implementar
-/// GET/PUT /api/users/me (deben fallar en rojo).
+/// features/US-005.feature.
 ///
-/// Contrato asumido: la identidad del actor viaja en el header "X-User-Id"
-/// (marcador provisional hasta la autenticación real de It 9–10). El cuerpo de
-/// PUT /api/users/me no incluye rol ni estado — son de solo lectura (R2/R3).
+/// Contrato: la identidad del actor viaja en el header "X-User-Id" (respaldado
+/// por login real desde It9). El cuerpo de PUT /api/users/me no incluye rol ni
+/// estado — son de solo lectura (R2/R3). Desde It10, crear cuentas de prueba
+/// requiere un Admin autenticado (<see cref="AuthTestHelpers"/>); las llamadas a
+/// /me no exigen rol específico (cualquier actor activo), así que se envían con
+/// un cliente plano y el header explícito por request.
 ///
-/// Deferido (dependen de otras iteraciones):
-///  - "No puedo editar el perfil de otro usuario" (envío directo a PUT /api/users/{id}
-///    sin ser Admin): requiere autorización por rol con identidad real (It 9–10),
-///    mismo caso que US-003-SEC.
+/// Deferido: "No puedo editar el perfil de otro usuario" vía PUT /api/users/{id}
+/// directo ya está cubierto en EditarUsuarioTests (US-003-SEC).
 /// </summary>
-public class EditarPerfilTests : IDisposable
+public class EditarPerfilTests : IAsyncLifetime
 {
     private readonly InMemoryApiFactory _factory = new();
-    private readonly HttpClient _client;
+    private HttpClient _client = null!;
+    private HttpClient _adminClient = null!;
 
     private static readonly JsonSerializerOptions JsonOptions =
         new() { PropertyNameCaseInsensitive = true };
 
-    public EditarPerfilTests() => _client = _factory.CreateClient();
+    public async Task InitializeAsync()
+    {
+        _adminClient = _factory.CreateClient();
+        var adminId = await _adminClient.BootstrapAdminAsync();
+        _adminClient.AuthenticateAs(adminId);
 
-    public void Dispose()
+        _client = _factory.CreateClient();
+    }
+
+    public Task DisposeAsync()
     {
         _client.Dispose();
+        _adminClient.Dispose();
         _factory.Dispose();
+        return Task.CompletedTask;
     }
 
     private sealed record UserDto(Guid Id, string? Nombre, string? Email, string? Rol, string? Estado);
@@ -44,7 +54,7 @@ public class EditarPerfilTests : IDisposable
     private async Task<UserDto> CrearAsync(
         string nombre, string email, string password = "Abcdef1x", string rol = "Editor", string estado = "Activo")
     {
-        var response = await _client.PostAsJsonAsync("/api/users", new
+        var response = await _adminClient.PostAsJsonAsync("/api/users", new
         {
             nombre,
             email,
