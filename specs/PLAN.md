@@ -116,6 +116,19 @@
 
 ---
 
+## Cierre de auditoría — MNT-1 (Admin sembrado) y US-006-EDGE2 (matriz efectiva) ✅
+
+`/audit` (corrida sobre las 16 iteraciones ✅) encontró dos gaps reales, no solo de cobertura de tests: (1) el sistema no sembraba ningún Admin al arrancar — el primer `POST /api/users` sin autenticar contra una base vacía ganaba y se volvía el Admin fundador (confirmado en vivo contra `docker compose up` con volumen limpio); (2) la matriz de permisos (`PUT /api/permissions`) persistía cambios pero no regía la autorización real — `AuthorizeAsync` decidía con listas de roles fijas por endpoint, ignorando la matriz.
+
+**Estado:** ✅ Ambos cerrados. `dotnet test` → 73/73 verde en las clases impactadas (todas menos `HealthCheckTests`, no tocada) + hook de pre-commit con la suite completa.
+
+- **MNT-1:** `AdminSeedService` (`src/Application/Users/AdminSeedService.cs`) siembra un Admin inicial si la base está vacía, reutilizando `CreateUserService` (sin duplicar invariantes). Credenciales configurables vía `SeedOptions`/sección `Seed` (default `admin@sistema.local`, fuera del dominio `@cidenet.com` de los datos de prueba para no colisionar con ellos). Corre al arrancar (`Program.cs`, antes de `app.Run()`) en todo entorno, incluida `Testing` — así los tests también tienen un actor conocido. El bypass "primer POST sin autenticar" en `POST /api/users` se eliminó por completo; `AuthTestHelpers.BootstrapAdminAsync` ahora inicia sesión como el Admin sembrado en vez de crear uno nuevo. Cambiar la contraseña sembrada en el primer acceso (MNT-2) sigue fuera de alcance (⚡, no crítico), documentado como gap conocido.
+- **US-006-EDGE2:** Los 4 endpoints CRUD de `/api/users` (no los de `/api/permissions`, `/users/me`, `/audit-log` ni `/monitoring/alerts`, que siguen siendo administrativos/self-service) ahora se autorizan vía `AuthorizePermissionAsync`, que consulta `IPermissionRepository` (rol × recurso `Users` × acción) en vez de una lista de roles fija; el rol Admin sigue siempre permitido (su fila en la matriz es inmutable). La matriz de permisos por defecto también se siembra al arrancar, para que siempre haya algo que consultar.
+- **Tests nuevos:** `tests/Api.Tests/ArranqueSistema/ArranqueSistemaTests.cs` (2, desde `features/US-001-MNT.feature`) + 2 en `MatrizPermisosTests.cs` (desde US-006-EDGE2, adaptados a Create/Read porque el default de Update para Editor ya era `false` y no discriminaría el fix). Los 4 se vieron fallar en rojo antes de implementar.
+- **Gaps de la auditoría fuera de este cierre** (no pedidos, quedan documentados): MNT-2 (forzar cambio de contraseña sembrada), `GET /api/users/{id}` inexistente, y US-005 (editar mi perfil) sin frontend.
+
+---
+
 ## Fuera del núcleo del MVP (opcional / posterior)
 
 - **Retención/purga de datos** (US-001-MNT/MNT-3, 💡): job de purga física configurable (12/24 meses). Planificar como iteración adicional si se prioriza; no bloquea el MVP.

@@ -7,6 +7,7 @@ using Application.Audit;
 using Application.Monitoring;
 using Application.Permissions;
 using Application.Users;
+using Domain.Permissions;
 using Domain.Users;
 using Infrastructure.Persistence;
 using Infrastructure.Security;
@@ -45,6 +46,8 @@ builder.Services.AddScoped<IFailedLoginTracker, FailedLoginTracker>();
 builder.Services.AddSingleton<IPasswordHasher, BcryptPasswordHasher>();
 builder.Services.AddSingleton(
     builder.Configuration.GetSection("Monitoring").Get<MonitoringOptions>() ?? new MonitoringOptions());
+builder.Services.AddSingleton(
+    builder.Configuration.GetSection("Seed").Get<SeedOptions>() ?? new SeedOptions());
 builder.Services.AddScoped<AlertService>();
 builder.Services.AddScoped<CreateUserService>();
 builder.Services.AddScoped<ListUsersService>();
@@ -53,6 +56,7 @@ builder.Services.AddScoped<DeleteUserService>();
 builder.Services.AddScoped<EditMyProfileService>();
 builder.Services.AddScoped<PermissionsService>();
 builder.Services.AddScoped<LoginService>();
+builder.Services.AddScoped<AdminSeedService>();
 
 var app = builder.Build();
 
@@ -80,12 +84,11 @@ var api = app.MapGroup("/api")
     .AddEndpointFilter<AuditLogFilter>();
 
 api.MapGet("/users", async (
-    HttpRequest httpRequest, IUserRepository users,
+    HttpRequest httpRequest, IUserRepository users, IPermissionRepository permissions,
     string? search, string? rol, string? estado, int? page, int? pageSize,
     ListUsersService service) =>
 {
-    // Admin gestiona; Editor ve en solo lectura (mismo GET, sin acciones de escritura); Viewer sin acceso.
-    var (_, denied) = await AuthorizeAsync(httpRequest, users, UserRole.Admin, UserRole.Editor);
+    var (_, denied) = await AuthorizePermissionAsync(httpRequest, users, permissions, PermissionResource.Users, PermissionAction.Read);
     if (denied is not null)
     {
         return denied;
@@ -98,17 +101,14 @@ api.MapGet("/users", async (
 })
 .WithName("ListUsers");
 
-api.MapPost("/users", async (HttpRequest httpRequest, IUserRepository users, CreateUserRequest request, CreateUserService service) =>
+api.MapPost("/users", async (
+    HttpRequest httpRequest, IUserRepository users, IPermissionRepository permissions,
+    CreateUserRequest request, CreateUserService service) =>
 {
-    // Arranque: la primera cuenta del sistema (el Admin semilla) se crea sin
-    // exigir autorización porque todavía no existe ningún Admin que la otorgue.
-    if (await users.AnyAsync())
+    var (_, denied) = await AuthorizePermissionAsync(httpRequest, users, permissions, PermissionResource.Users, PermissionAction.Create);
+    if (denied is not null)
     {
-        var (_, denied) = await AuthorizeAsync(httpRequest, users, UserRole.Admin);
-        if (denied is not null)
-        {
-            return denied;
-        }
+        return denied;
     }
 
     var result = await service.CreateAsync(new CreateUserCommand(
@@ -131,9 +131,10 @@ api.MapPost("/users", async (HttpRequest httpRequest, IUserRepository users, Cre
 .WithName("CreateUser");
 
 api.MapPut("/users/{id:guid}", async (
-    HttpRequest httpRequest, IUserRepository users, Guid id, EditUserRequest request, EditUserService service) =>
+    HttpRequest httpRequest, IUserRepository users, IPermissionRepository permissions,
+    Guid id, EditUserRequest request, EditUserService service) =>
 {
-    var (actor, denied) = await AuthorizeAsync(httpRequest, users, UserRole.Admin);
+    var (actor, denied) = await AuthorizePermissionAsync(httpRequest, users, permissions, PermissionResource.Users, PermissionAction.Update);
     if (denied is not null)
     {
         return denied;
@@ -160,9 +161,11 @@ api.MapPut("/users/{id:guid}", async (
 })
 .WithName("EditUser");
 
-api.MapDelete("/users/{id:guid}", async (HttpRequest httpRequest, IUserRepository users, Guid id, DeleteUserService service) =>
+api.MapDelete("/users/{id:guid}", async (
+    HttpRequest httpRequest, IUserRepository users, IPermissionRepository permissions,
+    Guid id, DeleteUserService service) =>
 {
-    var (actor, denied) = await AuthorizeAsync(httpRequest, users, UserRole.Admin);
+    var (actor, denied) = await AuthorizePermissionAsync(httpRequest, users, permissions, PermissionResource.Users, PermissionAction.Delete);
     if (denied is not null)
     {
         return denied;
@@ -304,12 +307,21 @@ api.MapGet("/monitoring/alerts", async (HttpRequest httpRequest, IUserRepository
 })
 .WithName("GetAlerts");
 
-// Aplica la migración inicial al arrancar (fuera de Testing, donde el
-// harness ya sustituye el AppDbContext por EF InMemory).
-if (!app.Environment.IsEnvironment("Testing"))
+// Arranque (MNT-1): aplica la migración inicial (fuera de Testing, donde el
+// harness ya sustituye el AppDbContext por EF InMemory) y siembra el Admin
+// inicial + la matriz de permisos por defecto si la base está vacía. La
+// siembra corre en todo entorno (incluida Testing) porque ahí también hace
+// falta un actor conocido con el que autenticar los tests, y porque
+// AuthorizeAsync necesita que la matriz ya exista para poder consultarla.
+using (var scope = app.Services.CreateScope())
 {
-    using var scope = app.Services.CreateScope();
-    await scope.ServiceProvider.GetRequiredService<AppDbContext>().Database.MigrateAsync();
+    if (!app.Environment.IsEnvironment("Testing"))
+    {
+        await scope.ServiceProvider.GetRequiredService<AppDbContext>().Database.MigrateAsync();
+    }
+
+    await scope.ServiceProvider.GetRequiredService<AdminSeedService>().SeedIfNeededAsync();
+    await scope.ServiceProvider.GetRequiredService<PermissionsService>().GetMatrixAsync();
 }
 
 app.Run();
@@ -348,6 +360,42 @@ static async Task<(User? Actor, IResult? Denied)> AuthorizeAsync(
         return (null, Results.Json(
             new { error = "No tiene permisos para realizar esta acción." },
             statusCode: StatusCodes.Status403Forbidden));
+    }
+
+    return (actor, null);
+}
+
+/// <summary>
+/// Variante de AuthorizeAsync que consulta la matriz de permisos (US-006-EDGE2:
+/// un cambio en la matriz debe regir la autorización efectiva) en vez de una
+/// lista de roles fija en el propio endpoint. El rol Admin siempre pasa: su
+/// fila en la matriz es inmutable y queda fija en "permitido" (R3/anti-lockout,
+/// ver PermissionsService.EditMatrixAsync).
+/// </summary>
+static async Task<(User? Actor, IResult? Denied)> AuthorizePermissionAsync(
+    HttpRequest request, IUserRepository users, IPermissionRepository permissions,
+    PermissionResource resource, PermissionAction action)
+{
+    if (!TryGetActorId(request, out var actorId))
+    {
+        return (null, Results.Unauthorized());
+    }
+
+    var actor = await users.GetByIdAsync(actorId);
+    if (actor is null || actor.Status != UserStatus.Activo)
+    {
+        return (null, Results.Unauthorized());
+    }
+
+    if (actor.Role != UserRole.Admin)
+    {
+        var permission = await permissions.FindAsync(actor.Role, resource, action);
+        if (permission is null || !permission.Allowed)
+        {
+            return (null, Results.Json(
+                new { error = "No tiene permisos para realizar esta acción." },
+                statusCode: StatusCodes.Status403Forbidden));
+        }
     }
 
     return (actor, null);

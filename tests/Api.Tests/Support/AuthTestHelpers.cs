@@ -3,27 +3,26 @@ using System.Net.Http;
 using System.Net.Http.Json;
 using System.Text.Json;
 using System.Threading.Tasks;
+using Application.Users;
 
 namespace Api.Tests.Support;
 
 /// <summary>
-/// Helpers de autenticación para tests (It10, autorización transversal).
-/// La primera cuenta del sistema (el Admin de arranque) se crea sin exigir
-/// autorización porque todavía no hay ningún Admin que la otorgue; de ahí en
-/// adelante, cada llamada debe indicar el actor mediante X-User-Id.
+/// Helpers de autenticación para tests. Desde el cierre de auditoría (MNT-1),
+/// el sistema siembra un Admin al arrancar (<see cref="SeedOptions"/>); los
+/// tests se autentican como ESE Admin vía login real. Ya no existe una vía de
+/// "primer POST /api/users sin autenticar gana" — quedó cerrada a propósito.
 /// </summary>
 public static class AuthTestHelpers
 {
-    public static async Task<Guid> BootstrapAdminAsync(this HttpClient client, string email = "bootstrap-admin@system.local")
+    public static async Task<Guid> BootstrapAdminAsync(this HttpClient client)
     {
-        var response = await client.PostAsJsonAsync("/api/users", new
+        var seed = new SeedOptions();
+
+        var response = await client.PostAsJsonAsync("/api/auth/login", new
         {
-            nombre = "Admin Bootstrap",
-            email,
-            password = "Abcdef1x",
-            confirmPassword = "Abcdef1x",
-            rol = "Admin",
-            estado = "Activo"
+            email = seed.AdminEmail,
+            password = seed.AdminPassword
         });
         response.EnsureSuccessStatusCode();
         var dto = await response.Content.ReadFromJsonAsync<JsonElement>();

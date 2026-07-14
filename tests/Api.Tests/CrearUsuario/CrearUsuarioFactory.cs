@@ -16,11 +16,9 @@ namespace Api.Tests.CrearUsuario;
 /// cableado a Postgres por un proveedor EF InMemory, aislado por instancia,
 /// para que los tests corran sin una base real (decisión de harness: EF InMemory).
 ///
-/// Desde It10 (autorización transversal), siembra un Admin de arranque una
-/// sola vez para toda la clase (la BD es compartida vía IClassFixture): la
-/// primera cuenta del sistema se crea sin exigir autorización porque todavía
-/// no hay ningún Admin que la otorgue; de ahí en adelante, los tests actúan
-/// como ese Admin (ver <see cref="AdminId"/>).
+/// El host siembra su propio Admin al arrancar (MNT-1); esta factory solo
+/// inicia sesión con él una vez para toda la clase (la BD es compartida vía
+/// IClassFixture) y reusa su id en los tests (ver <see cref="AdminId"/>).
 ///
 /// Nota: EF InMemory no valida el índice único case-insensitive ni la concurrencia
 /// como Postgres; esas reglas se verifican a nivel de lógica de aplicación.

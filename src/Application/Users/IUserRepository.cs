@@ -9,9 +9,8 @@ public interface IUserRepository
     Task<bool> ExistsByEmailAsync(string normalizedEmail, CancellationToken ct = default);
 
     /// <summary>
-    /// ¿Existe al menos una cuenta en el sistema? Habilita el arranque: la
-    /// primera cuenta (el Admin semilla) se crea sin exigir autorización porque
-    /// todavía no hay ningún Admin que pueda otorgarla.
+    /// ¿Existe al menos una cuenta en el sistema? Usado por AdminSeedService
+    /// (MNT-1) para decidir si sembrar el Admin inicial al arrancar.
     /// </summary>
     Task<bool> AnyAsync(CancellationToken ct = default);
 

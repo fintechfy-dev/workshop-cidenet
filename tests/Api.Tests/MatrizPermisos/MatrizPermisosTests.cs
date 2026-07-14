@@ -26,8 +26,9 @@ namespace Api.Tests.MatrizPermisos;
 /// actor por defecto; "Solo Admin accede a la matriz" (US-006-SEC) ya no está
 /// deferido.
 ///
-/// Deferido: "Un cambio se refleja en la autorización efectiva" (que otros
-/// endpoints respeten la matriz) es transversal, fuera de alcance de US-006.
+/// "Un cambio se refleja en la autorización efectiva" (US-006-EDGE2) se
+/// cerró en la auditoría de cierre: los endpoints de /api/users consultan la
+/// matriz vía AuthorizeAsync en vez de una lista de roles fija.
 /// </summary>
 public class MatrizPermisosTests : IAsyncLifetime
 {
@@ -158,5 +159,49 @@ public class MatrizPermisosTests : IAsyncLifetime
 
         var putResponse = await editorClient.PutAsJsonAsync("/api/permissions", new { cambios = Array.Empty<object>() });
         Assert.Equal(HttpStatusCode.Forbidden, putResponse.StatusCode);
+    }
+
+    // Scenario: Un cambio de permiso se refleja en la autorización efectiva (US-006-EDGE2)
+    // Adaptado a "Create" (default de Editor: false): activar el permiso debe
+    // habilitar una acción que su rol tenía bloqueada.
+    [Fact]
+    public async Task Activar_users_create_a_editor_le_permite_crear_usuarios()
+    {
+        var putResponse = await PutMatrixAsync(new { rol = "Editor", recurso = "Users", accion = "Create", permitido = true });
+        Assert.Equal(HttpStatusCode.OK, putResponse.StatusCode);
+
+        var editorId = await CrearEditorAsync();
+        var editorClient = _factory.CreateClient();
+        editorClient.AuthenticateAs(editorId);
+
+        var response = await editorClient.PostAsJsonAsync("/api/users", new
+        {
+            nombre = "Nuevo Usuario",
+            email = "nuevo-por-editor@cidenet.com",
+            password = "Abcdef1x",
+            confirmPassword = "Abcdef1x",
+            rol = "Viewer",
+            estado = "Activo"
+        });
+
+        Assert.Equal(HttpStatusCode.Created, response.StatusCode);
+    }
+
+    // Scenario: Un cambio de permiso se refleja en la autorización efectiva (US-006-EDGE2)
+    // Adaptado a "Read" (default de Editor: true): retirar el permiso debe
+    // bloquear una acción que su rol tenía permitida.
+    [Fact]
+    public async Task Retirar_users_read_a_editor_le_bloquea_el_listado_de_usuarios()
+    {
+        var putResponse = await PutMatrixAsync(new { rol = "Editor", recurso = "Users", accion = "Read", permitido = false });
+        Assert.Equal(HttpStatusCode.OK, putResponse.StatusCode);
+
+        var editorId = await CrearEditorAsync();
+        var editorClient = _factory.CreateClient();
+        editorClient.AuthenticateAs(editorId);
+
+        var response = await editorClient.GetAsync("/api/users");
+
+        Assert.Equal(HttpStatusCode.Forbidden, response.StatusCode);
     }
 }
