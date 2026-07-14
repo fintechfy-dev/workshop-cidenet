@@ -1,8 +1,16 @@
 import { useEffect, useState } from "react";
 import { ApiError, listUsers, type UserRow } from "../api/client";
 import { getSession } from "../auth/session";
+import UserForm from "./UserForm";
+import DeleteConfirmModal from "./DeleteConfirmModal";
 
 type Status = "loading" | "ok" | "empty" | "error" | "forbidden";
+
+type ModalState =
+  | { tipo: "crear" }
+  | { tipo: "editar"; usuario: UserRow }
+  | { tipo: "eliminar"; usuario: UserRow }
+  | null;
 
 const SEARCH_DEBOUNCE_MS = 300;
 
@@ -14,10 +22,12 @@ export default function UsersTablePage() {
   const [rol, setRol] = useState("");
   const [estado, setEstado] = useState("");
   const [page, setPage] = useState(1);
+  const [version, setVersion] = useState(0);
 
   const [items, setItems] = useState<UserRow[]>([]);
   const [total, setTotal] = useState(0);
   const [status, setStatus] = useState<Status>("loading");
+  const [modal, setModal] = useState<ModalState>(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -41,7 +51,12 @@ export default function UsersTablePage() {
       cancelled = true;
       clearTimeout(timeout);
     };
-  }, [search, rol, estado, page]);
+  }, [search, rol, estado, page, version]);
+
+  function cerrarModalYRefrescar() {
+    setModal(null);
+    setVersion((v) => v + 1);
+  }
 
   if (status === "forbidden") {
     return <p role="alert">No tienes acceso a esta sección.</p>;
@@ -50,6 +65,12 @@ export default function UsersTablePage() {
   return (
     <section>
       <h1>Usuarios</h1>
+
+      {puedeGestionar && (
+        <button type="button" onClick={() => setModal({ tipo: "crear" })}>
+          Nuevo usuario
+        </button>
+      )}
 
       <div>
         <label>
@@ -121,8 +142,12 @@ export default function UsersTablePage() {
                   <td>{u.estado}</td>
                   {puedeGestionar && (
                     <td>
-                      <button type="button">Editar</button>
-                      <button type="button">Eliminar</button>
+                      <button type="button" onClick={() => setModal({ tipo: "editar", usuario: u })}>
+                        Editar
+                      </button>
+                      <button type="button" onClick={() => setModal({ tipo: "eliminar", usuario: u })}>
+                        Eliminar
+                      </button>
                     </td>
                   )}
                 </tr>
@@ -143,6 +168,30 @@ export default function UsersTablePage() {
             </button>
           </div>
         </>
+      )}
+
+      {modal && modal.tipo === "eliminar" && (
+        <section aria-label="Eliminar usuario">
+          <DeleteConfirmModal
+            usuario={modal.usuario}
+            onEliminado={cerrarModalYRefrescar}
+            onCancelar={() => setModal(null)}
+          />
+        </section>
+      )}
+
+      {modal && modal.tipo !== "eliminar" && (
+        <section aria-label={modal.tipo === "editar" ? "Editar usuario" : "Nuevo usuario"}>
+          <h2>{modal.tipo === "editar" ? "Editar usuario" : "Nuevo usuario"}</h2>
+          <UserForm
+            modo={modal.tipo === "crear" ? "crear" : "editar"}
+            usuario={modal.tipo === "editar" ? modal.usuario : undefined}
+            onGuardado={cerrarModalYRefrescar}
+          />
+          <button type="button" onClick={() => setModal(null)}>
+            Cancelar
+          </button>
+        </section>
       )}
     </section>
   );

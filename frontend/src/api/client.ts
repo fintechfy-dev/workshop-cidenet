@@ -118,6 +118,33 @@ export async function updateUser(id: string, payload: EditUserPayload): Promise<
   return response.json();
 }
 
+export async function deleteUser(id: string): Promise<void> {
+  const response = await fetch(`${API_BASE_URL}/api/users/${id}`, {
+    method: "DELETE",
+    headers: authHeaders(),
+  });
+
+  if (response.status === 204) {
+    return;
+  }
+
+  throw new ApiError(await readErrorMessage(response, "No se pudo eliminar el usuario."), response.status);
+}
+
+export async function login(email: string, password: string): Promise<UserRow> {
+  const response = await fetch(`${API_BASE_URL}/api/auth/login`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ email, password }),
+  });
+
+  if (!response.ok) {
+    throw new ApiError(await readErrorMessage(response, "No se pudo iniciar sesión."), response.status);
+  }
+
+  return response.json();
+}
+
 export interface PermissionCell {
   rol: string;
   recurso: string;
